@@ -15,6 +15,8 @@ Compare local market pricing against international RRP for the current shortlist
 
 2. **Get local prices** from `for-ai/catalogs/[vendor]/` (or `data/extracted/products.csv` if `/extract` has been run). Fall back to the pricing in `data/products/[brand]-[model].json` if cached.
 
+   If `<plugin-data-dir>/marketplaces.yaml` exists (see `/shop-setup`), the shops listed there are the local market for this purpose — and the `price-scan` skill will fetch live prices from them properly, through the right VPN exit. Prefer a fresh scan over a stale catalogue, and prefer either over a remembered number.
+
 3. **Look up international RRP** for each model. Priority order for the source:
    1. Official manufacturer site
    2. Official regional distributor site
@@ -22,7 +24,11 @@ Compare local market pricing against international RRP for the current shortlist
 
    Use WebFetch/WebSearch. Never guess prices.
 
-4. **Convert currencies** using a live rate (fetch from a current source, never hardcode). The user's local currency is in the Standing preferences snapshot in `spec.md`.
+   These egress from the cloud, not from this machine, so they are appropriate for a **manufacturer's RRP** — a published, single-currency figure — and not for a retail price, which varies by the country the request appears to come from. Any actual shop price belongs to the `price-scan` skill.
+
+4. **Convert currencies** using a live rate (fetch from a current source, never hardcode). The user's local currency comes from the address profile in `<plugin-data-dir>/addresses.yaml` if one is configured, otherwise from the Standing preferences snapshot in `spec.md`.
+
+   That profile also carries the destination's tax rule and rate. Where it's marked unconfirmed, say so rather than presenting the total as settled.
 
 5. **Build a comparison table:**
 

@@ -1,0 +1,114 @@
+# marketplaces.yaml — which shops the price scanner may price against, and how
+# it reaches them.
+#
+# THIS FILE IS AN EXAMPLE. The real one lives outside this repo, at:
+#   $CLAUDE_USER_DATA/purchasing/marketplaces.yaml
+#   -> $XDG_DATA_HOME/claude-plugins/purchasing/marketplaces.yaml
+#   -> ~/.local/share/claude-plugins/purchasing/marketplaces.yaml
+#
+# The plugin is public; your account details, delivery addresses and VPN setup
+# are not. Nothing here should ever be committed with real values in it.
+#
+# Generate the real one with /purchasing:shop-setup, or copy this and edit.
+
+version: 1
+
+default_address: home
+
+# ---------------------------------------------------------------------------
+# Egress
+# ---------------------------------------------------------------------------
+# Everything leaves from your own machine, carrying whatever exit your VPN is
+# currently set to. That is the point: prices, stock and shipping quotes are
+# geo-dependent, and a cloud fetcher would silently return the wrong country's.
+#
+# Swapping VPN client: change `provider`, or override `commands` outright. The
+# scanner shells out to whatever you declare here — it has no opinion beyond
+# needing `status` and `connect`. Built-in defaults exist for windscribe,
+# mullvad, nordvpn and protonvpn; use `provider: custom` plus `commands` for
+# anything else, or `provider: none` to manage the VPN entirely by hand.
+vpn:
+  provider: windscribe
+
+  # May the scanner change your VPN connection on its own? With this off it
+  # stops and tells you the command to run instead. Either way it says what it
+  # did — it never moves your exit silently.
+  auto_switch: true
+
+  # Uncomment to adapt to a different client. `{location}` is substituted from
+  # the `locations` map below.
+  # commands:
+  #   status:     ["mullvad", "status"]
+  #   connect:    ["mullvad", "relay", "set", "location", "{location}"]
+  #   disconnect: ["mullvad", "disconnect"]
+
+  # ISO country code -> the string your client's `connect` expects. Clients
+  # differ wildly here ("US" vs "us" vs "United_States"), which is why it's
+  # config rather than code.
+  locations:
+    US: "US"
+    IL: "IL"
+
+  # Seconds to wait after connecting before routes are usable. Too low and the
+  # first fetch of a batch fails for no visible reason.
+  settle_seconds: 8
+
+  # Regex for lines the client writes as logging rather than output. Windscribe
+  # interleaves JSON log lines with its human-readable block.
+  # noise: '^\s*\{"tm"'
+
+# ---------------------------------------------------------------------------
+# Shops
+# ---------------------------------------------------------------------------
+marketplaces:
+  - id: amazon-us
+    name: Amazon (US)
+    url: https://www.amazon.com
+    in_scope: true
+    currency: USD
+
+    # The scanner will move your exit here before touching this shop, and will
+    # refuse to price it if it can't confirm the exit afterwards.
+    requires_geo: US
+
+    # Free text, but it changes the shipping maths — say if a subscription is
+    # already paid for.
+    account: "<e.g. Prime active>"
+
+    fetch:
+      # Real browser, real logged-in session, real VPN exit. The correct route
+      # for anything behind bot protection or showing session-dependent prices.
+      primary: claude-in-chrome
+      # Plain HTTP from this machine — same exit, no session. What price_scan.py
+      # uses. Fine when it isn't blocked, and it is often blocked.
+      fallback: script
+      # These egress from somewhere else entirely and will confidently return
+      # another country's price. Never source a number from them.
+      never: [websearch, webfetch, tavily, gateway-fetch]
+
+    shipping:
+      - address: home
+        method: "<e.g. Prime 2-day>"
+        cost: 0
+        notes: "<what makes this the default route, or what disqualifies it>"
+
+    # destination_sales_tax | vat_added | vat_inclusive | none
+    tax: destination_sales_tax
+
+  - id: newegg
+    name: Newegg (US)
+    url: https://www.newegg.com
+    in_scope: true
+    currency: USD
+    requires_geo: US
+    account: "<e.g. none>"
+    fetch:
+      primary: claude-in-chrome
+      fallback: script
+      never: [websearch, webfetch, tavily, gateway-fetch]
+    shipping:
+      - address: home
+        method: "<e.g. standard ground>"
+        cost: null
+        notes: "<per-item; Newegg quotes at cart rather than on the product page>"
+    tax: destination_sales_tax

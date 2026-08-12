@@ -1,0 +1,54 @@
+# addresses.yaml — where things are actually being delivered, and what that
+# does to the price.
+#
+# THIS FILE IS AN EXAMPLE. The real one lives outside this repo, alongside
+# marketplaces.yaml in the plugin data directory. It contains your postal
+# address and delivery contact details, so it is never committed here.
+#
+# An address profile is not just a postcode. It carries the tax rule that turns
+# a listed price into a landed cost, the deadline that decides whether a
+# shipping option is viable at all, and the local quirks that decide whether the
+# parcel actually arrives.
+
+version: 1
+
+addresses:
+  - id: home
+    label: "<short human label>"
+    country: US
+    currency: USD
+
+    # Free-form; the scanner doesn't parse these lines, it just carries them
+    # through to reports and hands them to you at checkout time.
+    lines:
+      - "<line 1>"
+      - "<city, region, postcode>"
+
+    tax:
+      # Used by marketplaces with `tax: destination_sales_tax`.
+      sales_tax_pct: 0.00
+      # Set true only once you've checked the current rate for this address.
+      # Until then the scanner labels every total "rate unconfirmed".
+      confirmed: false
+
+      # Used by marketplaces with `tax: vat_added`.
+      # vat_pct: 0.00
+
+    delivery:
+      # Anything arriving after this is worthless regardless of price, so the
+      # scanner surfaces it next to shipping estimates.
+      deadline: null
+      deadline_basis: "<why this date, and how firm it is>"
+
+      constraints:
+        - "<things that disqualify an otherwise-cheap option>"
+
+      # Quirks a courier needs. Keep the operational truth here rather than
+      # rediscovering it per delivery.
+      # dropoff: "<where the driver actually goes, if not the street address>"
+      # coords: "<lat, lon>"
+      # access: "<gate/barrier/buzzer, and what has to happen first>"
+      # contacts: "<who the driver calls>"
+
+    # Where the long-form version of all this lives, if there is one.
+    reference: "<path or URL to the delivery-instructions doc, if any>"

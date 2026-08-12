@@ -1,0 +1,34 @@
+# price-watchlist.yaml — the shortlist for one purchase.
+#
+# This one DOES belong in the purchase-research repo, at its root. It is the
+# per-purchase half of the scanner: marketplaces.yaml says which shops exist and
+# how to reach them, this says which specific products you're tracking.
+#
+# Copy it into the repo, fill in URLs as research narrows the field, and re-run
+# the scan whenever you want current numbers. Each run appends to
+# data/price-scans/price-history.csv, so price movement accumulates.
+
+version: 1
+
+# What you're buying. Used as the report title and the history-file key.
+item: "<what this purchase is, in a few words>"
+
+# Address profile to price against. Falls back to `default_address` in
+# marketplaces.yaml when omitted. Override per run with --address.
+address: home
+
+candidates:
+  - name: "<make and model>"
+    marketplace: amazon-us          # must match an id in marketplaces.yaml
+    url: "https://www.amazon.com/dp/<ASIN>"
+    # Optional, for your own notes — the scanner passes them through untouched.
+    # sku: "<ASIN / item number>"
+    # note: "<why this one is on the list>"
+
+  - name: "<make and model>"
+    marketplace: newegg
+    url: "https://www.newegg.com/p/<item-number>"
+
+# Direct product URLs work far better than search pages: search results are the
+# most aggressively bot-protected part of these sites, and a search URL doesn't
+# pin you to one product between runs, which makes the price history meaningless.
