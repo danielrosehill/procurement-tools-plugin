@@ -23,7 +23,7 @@ If it's ambiguous, ask which — the two workspaces are shaped in opposite direc
 `$ARGUMENTS` is parsed as:
 
 - **First positional**: workspace name (kebab-case, used as directory and GitHub repo name). Required.
-- **Second positional** (optional): target parent path. Defaults to `~/repos/github/my-repos`.
+- **Second positional** (optional): target parent path. Defaults to `~/repos/github/logistics-procurement/`, where purchase-research workspaces live by convention (`<Thing>-Purchase-MMDD`). (`~/repos/github/my-repos/` is no longer the default; it holds only blog repos now.)
 - **`--variant=<general-purchasing|market-landscape|tech-procurement|vendor-recommendations>`** (optional): which scaffold to copy. Default: `general-purchasing`.
 - **`--local-only`** (optional): skip GitHub repo creation and push. Default: create a public GitHub repo and push.
 - **`--private`** (optional): create the GitHub repo as private. Default: public — **except `market-landscape`, which defaults to private** (its spec describes what the user is planning). Pass `--public` to override that.
