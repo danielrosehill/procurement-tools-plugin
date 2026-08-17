@@ -45,6 +45,6 @@ Finish by identifying which segment boundary the buyer is actually choosing acro
 
 ## Feed back into the sweep
 
-Segmenting almost always reveals a corner of the market the sweep missed — a segment with one member usually means the sweep stopped early, not that the segment is genuinely tiny. When it does, say so and re-run `/purchasing:mkt-survey <segment>` before moving on. Survey → segment → matrix is a loop.
+Segmenting almost always reveals a corner of the market the sweep missed — a segment with one member usually means the sweep stopped early, not that the segment is genuinely tiny. When it does, say so and re-run `/procurement-tools:mkt-survey <segment>` before moving on. Survey → segment → matrix is a loop.
 
-Next: `/purchasing:mkt-matrix`.
+Next: `/procurement-tools:mkt-matrix`.

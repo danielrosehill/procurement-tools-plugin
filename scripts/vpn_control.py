@@ -53,7 +53,7 @@ GEO_ENDPOINTS: list[tuple[str, Callable[[dict[str, Any]], str | None]]] = [
     ("https://api.country.is/", lambda d: d.get("country")),
 ]
 
-USER_AGENT = "purchasing-price-scan/1.0 (+https://github.com/danielrosehill/Claude-Purchasing-Plugin)"
+USER_AGENT = "procurement-tools-price-scan/1.0 (+https://github.com/danielrosehill/Claude-Purchasing-Plugin)"
 
 
 @dataclass

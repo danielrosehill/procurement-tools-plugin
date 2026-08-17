@@ -6,7 +6,7 @@ This workspace answers **"what's on the market that meets this spec, and what do
 
 One repo = one spec. The spec is a **requirement**, not a product: "a Bluetooth headset that survives an 8-hour day, works on Linux, and has a hardware mute button" — not "which of these three headsets is best". The deliverable is a **survey of the field**, not a recommendation.
 
-**This is the deliberate opposite of the `general-purchasing` variant.** That one narrows to a decision; this one maps the territory. If the user already knows they are buying one of a known handful of products, they're in the wrong workspace — point them at `/purchasing:new-workspace <name> --variant=general-purchasing`.
+**This is the deliberate opposite of the `general-purchasing` variant.** That one narrows to a decision; this one maps the territory. If the user already knows they are buying one of a known handful of products, they're in the wrong workspace — point them at `/procurement-tools:new-workspace <name> --variant=general-purchasing`.
 
 ## What "done" looks like
 
@@ -23,13 +23,13 @@ A landscape survey is **not** complete because a good option was found. Finding 
 ## The workflow
 
 ```
-/purchasing:mkt-spec       → define the requirement envelope + survey scope (spec.md)
-/purchasing:mkt-survey     → sweep the market; enumerate the field (landscape/field.md)
-/purchasing:mkt-segment    → derive segments + the real variation axes (landscape/segments.md)
-/purchasing:mkt-matrix     → spec-conformance matrix over the whole field
-/purchasing:mkt-gaps       → unmet requirements, over-served requirements, compromise axes
-/purchasing:mkt-report     → the landscape report (markdown + PDF)
-/purchasing:mkt-refresh    → months later: what changed since the last survey
+/procurement-tools:mkt-spec       → define the requirement envelope + survey scope (spec.md)
+/procurement-tools:mkt-survey     → sweep the market; enumerate the field (landscape/field.md)
+/procurement-tools:mkt-segment    → derive segments + the real variation axes (landscape/segments.md)
+/procurement-tools:mkt-matrix     → spec-conformance matrix over the whole field
+/procurement-tools:mkt-gaps       → unmet requirements, over-served requirements, compromise axes
+/procurement-tools:mkt-report     → the landscape report (markdown + PDF)
+/procurement-tools:mkt-refresh    → months later: what changed since the last survey
 ```
 
 `mkt-survey` → `mkt-segment` → `mkt-matrix` is a loop, not a line. Segmenting usually reveals a category the sweep missed; go back and sweep it.
@@ -52,7 +52,7 @@ A landscape survey is **not** complete because a good option was found. Finding 
 
 ## The spec (`spec.md`)
 
-Capability-framed, not product-framed. Populated by `/purchasing:mkt-spec`.
+Capability-framed, not product-framed. Populated by `/procurement-tools:mkt-spec`.
 
 It carries two things the purchase spec doesn't:
 
@@ -79,8 +79,8 @@ Prices are geo-dependent and any cloud fetch returns real-looking numbers for th
 
 - Prices in the field table are **indicative band only** (e.g. "$180–260 street") for segmenting the market, and must be labelled as such.
 - Manufacturer RRP from an official source is fine from any fetcher — it's a published single-currency figure.
-- Any **actual shop price** must come from the `price-scan` skill, which egresses from the user's own machine through the right VPN exit. See `/purchasing:shop-setup`.
-- `/purchasing:market-check` is available if a specific option needs local-vs-import realism — but that's a purchase question, and answering it here usually means the survey has drifted into a decision.
+- Any **actual shop price** must come from the `price-scan` skill, which egresses from the user's own machine through the right VPN exit. See `/procurement-tools:shop-setup`.
+- `/procurement-tools:market-check` is available if a specific option needs local-vs-import realism — but that's a purchase question, and answering it here usually means the survey has drifted into a decision.
 
 ## Sources
 
@@ -90,15 +90,15 @@ Vendor roundups and "best X of 2026" listicles are useful for **recall** — fin
 
 ## Reuse from the plugin
 
-These `/purchasing:*` primitives work here unchanged:
+These `/procurement-tools:*` primitives work here unchanged:
 
-- `/purchasing:extract` — pull options out of screenshots, PDFs and vendor catalogues into the field
-- `/purchasing:evaluate <product>` — quick check of one option against the spec
-- `/purchasing:update-spec <change>` — targeted spec edit, flags downstream impact
+- `/procurement-tools:extract` — pull options out of screenshots, PDFs and vendor catalogues into the field
+- `/procurement-tools:evaluate <product>` — quick check of one option against the spec
+- `/procurement-tools:update-spec <change>` — targeted spec edit, flags downstream impact
 - `price-scan` skill — live pricing through your own egress
 - Sub-agents `manufacturer-research`, `spec-verification`, `review-aggregation`, `product-extraction`
 
-Not applicable here: `/purchasing:intake`, `/purchasing:research`, `/purchasing:recommend`, `/purchasing:recompare`, `/purchasing:apply-profile`. Those drive toward a pick. Buyer profiles in particular are a **bias layer** — deliberately absent from this variant, because biasing a survey defeats its purpose. Apply a profile later, in a purchase repo, once the landscape is known.
+Not applicable here: `/procurement-tools:intake`, `/procurement-tools:research`, `/procurement-tools:recommend`, `/procurement-tools:recompare`, `/procurement-tools:apply-profile`. Those drive toward a pick. Buyer profiles in particular are a **bias layer** — deliberately absent from this variant, because biasing a survey defeats its purpose. Apply a profile later, in a purchase repo, once the landscape is known.
 
 ## Visibility
 
@@ -109,7 +109,7 @@ Landscape surveys are usually **private by default** — the spec reveals what t
 When the survey is done and the user wants to actually buy something:
 
 ```
-/purchasing:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private
+/procurement-tools:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private
 ```
 
 Carry across the shortlist from `landscape/gaps.md` (the "candidates worth a decision" section) and the requirement list from `spec.md`. Leave this repo as the standing map of the market; the purchase repo is a separate, disposable thing.

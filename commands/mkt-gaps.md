@@ -42,8 +42,8 @@ Keep it short. If more than five or six options survive, the spec is under-const
 
 ## Unresolved
 
-Every `?` from the matrix that still matters, why it couldn't be closed, and what would close it. Being explicit here is what makes the survey honest and what makes `/purchasing:mkt-refresh` useful later.
+Every `?` from the matrix that still matters, why it couldn't be closed, and what would close it. Being explicit here is what makes the survey honest and what makes `/procurement-tools:mkt-refresh` useful later.
 
 ## Then
 
-Print the unmet requirements, the real trade-off, and the surviving candidate count. Next: `/purchasing:mkt-report`.
+Print the unmet requirements, the real trade-off, and the surviving candidate count. Next: `/procurement-tools:mkt-report`.

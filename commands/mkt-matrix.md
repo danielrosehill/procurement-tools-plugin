@@ -10,7 +10,7 @@ Score the field against the spec. Writes `landscape/matrix.md`.
 
 Every **live** option in `landscape/field.md`, against every must-have and hard no in `spec.md`. Nice-to-haves get their own smaller matrix underneath — they're cluster detectors here, not scoring criteria.
 
-Excluded options don't need a full row; `landscape/field.md` already records which requirement they failed. Include one if it's instructive — an option that fails a single must-have and clears everything else is the nearest-miss that `/purchasing:mkt-gaps` will want.
+Excluded options don't need a full row; `landscape/field.md` already records which requirement they failed. Include one if it's instructive — an option that fails a single must-have and clears everything else is the nearest-miss that `/procurement-tools:mkt-gaps` will want.
 
 ## Cell values
 
@@ -61,6 +61,6 @@ Close with what the matrix says about the field, not about individual options:
 
 ## Don't rank
 
-No scores, no weighted totals, no ordering. A weighted total requires weights the user hasn't given and buries the trade-offs the matrix exists to expose. Where the field narrows under some weighting, that belongs in `/purchasing:mkt-gaps` as a conditional narrowing, stated with its condition.
+No scores, no weighted totals, no ordering. A weighted total requires weights the user hasn't given and buries the trade-offs the matrix exists to expose. Where the field narrows under some weighting, that belongs in `/procurement-tools:mkt-gaps` as a conditional narrowing, stated with its condition.
 
-Next: `/purchasing:mkt-gaps`.
+Next: `/procurement-tools:mkt-gaps`.

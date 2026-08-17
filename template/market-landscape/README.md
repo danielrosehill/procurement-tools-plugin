@@ -10,7 +10,7 @@ A Claude Code workspace for **surveying a market against a spec**. You have a re
 Provisioned by the [purchasing plugin](https://github.com/danielrosehill/Claude-Purchasing-Plugin):
 
 ```
-/purchasing:new-workspace <name> --variant=market-landscape --private
+/procurement-tools:new-workspace <name> --variant=market-landscape --private
 ```
 
 ## Landscape vs purchase
@@ -29,13 +29,13 @@ They chain: survey the landscape here, then spin up a purchase repo for the actu
 ## The workflow
 
 ```
-/purchasing:mkt-spec       → requirement envelope + survey scope
-/purchasing:mkt-survey     → sweep the market, enumerate the field
-/purchasing:mkt-segment    → segments + the axes the market really varies on
-/purchasing:mkt-matrix     → conformance matrix over the whole field
-/purchasing:mkt-gaps       → unmet / over-served requirements, compromise axes
-/purchasing:mkt-report     → the landscape report (markdown + PDF)
-/purchasing:mkt-refresh    → months later: what changed
+/procurement-tools:mkt-spec       → requirement envelope + survey scope
+/procurement-tools:mkt-survey     → sweep the market, enumerate the field
+/procurement-tools:mkt-segment    → segments + the axes the market really varies on
+/procurement-tools:mkt-matrix     → conformance matrix over the whole field
+/procurement-tools:mkt-gaps       → unmet / over-served requirements, compromise axes
+/procurement-tools:mkt-report     → the landscape report (markdown + PDF)
+/procurement-tools:mkt-refresh    → months later: what changed
 ```
 
 Survey → segment → matrix is a loop. Segmenting almost always exposes a corner of the market the first sweep missed.
@@ -46,7 +46,7 @@ Survey → segment → matrix is a loop. Segmenting almost always exposes a corn
 - **The whole field is the artefact**, including what was ruled out and why, and options that are discontinued or region-locked. Knowing a category died is a finding.
 - **Segments are derived, not assumed.** The axes a market varies along are usually not the axes your spec was written in; discovering that mismatch is the most valuable output.
 - **Unknowns stay unknown.** Matrix cells you couldn't verify are marked `?` with a note on what would resolve them, never filled with a plausible guess.
-- **It survives.** Every entry is dated and sourced, so `/purchasing:mkt-refresh` can tell you six months later what actually changed.
+- **It survives.** Every entry is dated and sourced, so `/procurement-tools:mkt-refresh` can tell you six months later what actually changed.
 
 ## Layout
 
@@ -66,7 +66,7 @@ Survey → segment → matrix is a loop. Segmenting almost always exposes a corn
 
 ## Prices
 
-Indicative bands only in the field table — enough to segment the market, labelled as such. Real prices are geo-dependent, so any actual shop price comes from the `price-scan` skill running on your own machine through the right VPN exit (`/purchasing:shop-setup`). Manufacturer RRP from an official page is fine from anywhere.
+Indicative bands only in the field table — enough to segment the market, labelled as such. Real prices are geo-dependent, so any actual shop price comes from the `price-scan` skill running on your own machine through the right VPN exit (`/procurement-tools:shop-setup`). Manufacturer RRP from an official page is fine from anywhere.
 
 ## Public or private?
 

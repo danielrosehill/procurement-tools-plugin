@@ -65,7 +65,7 @@ Shopping preference (international shipping): [user's stance]
 
 If Mem0 MCP is not available:
 
-1. Write to `<plugin-data-dir>/shopping-preferences.md` (where `<plugin-data-dir>` is `$CLAUDE_USER_DATA/purchasing/` if set, else `$XDG_DATA_HOME/claude-plugins/purchasing/`, else `~/.local/share/claude-plugins/purchasing/` — see the `meta-tools:plugin-data-storage` canonical skill) as a structured markdown file
+1. Write to `<plugin-data-dir>/shopping-preferences.md` (where `<plugin-data-dir>` is `$CLAUDE_USER_DATA/procurement-tools/` if set, else `$XDG_DATA_HOME/claude-plugins/procurement-tools/`, else `~/.local/share/claude-plugins/procurement-tools/` — see the `meta-tools:plugin-data-storage` canonical skill) as a structured markdown file
 2. Tell the user: "Saved locally. Install Mem0 MCP (`/plugin install ...`) for cross-device / cross-machine persistence."
 
 ## Confirmation

@@ -7,11 +7,11 @@ argument-hint: [one-line description of the requirement, optional]
 
 Populate `spec.md` at the repo root for a **market landscape survey**. The output is a requirement and a sweep boundary — not a purchase brief.
 
-This is the `market-landscape` counterpart to `/purchasing:intake`. Do not run `/purchasing:intake` in this workspace; it asks decision questions (budget ceiling, urgency, deal-hunting posture) that bias a survey.
+This is the `market-landscape` counterpart to `/procurement-tools:intake`. Do not run `/procurement-tools:intake` in this workspace; it asks decision questions (budget ceiling, urgency, deal-hunting posture) that bias a survey.
 
 ## Before asking anything
 
-Read `spec.md`. If Status is already "Configured", ask whether to revise it or go straight to `/purchasing:mkt-survey`. For a targeted change use `/purchasing:update-spec <change>` instead.
+Read `spec.md`. If Status is already "Configured", ask whether to revise it or go straight to `/procurement-tools:mkt-survey`. For a targeted change use `/procurement-tools:update-spec <change>` instead.
 
 Do **not** load standing buyer preferences here. Trusted brands, avoided brands and markup thresholds are decision inputs; applying them to a sweep silently deletes parts of the map. They belong in the purchase workspace this survey eventually feeds.
 
@@ -68,7 +68,7 @@ Intended use, whether it feeds a decision, and refresh cadence. A survey feeding
 2. Set **Status**: Configured, **Last updated**: today, **Last full sweep**: never.
 3. Seed `## Open questions` with anything raised in the interview that the sweep should resolve.
 4. Summarise the requirement and the scope boundary in 4–6 lines.
-5. Prompt: "Spec saved. Run `/purchasing:mkt-survey` to start the sweep. Drop any catalogues or screenshots you already have into `sources/` first — `/purchasing:extract` can pull options out of them."
+5. Prompt: "Spec saved. Run `/procurement-tools:mkt-survey` to start the sweep. Drop any catalogues or screenshots you already have into `sources/` first — `/procurement-tools:extract` can pull options out of them."
 
 ## Style
 

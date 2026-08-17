@@ -1,14 +1,64 @@
-# purchasing
+# procurement-tools
 
 Claude Code plugin for running purchasing decisions end-to-end — from intake and spec, through research and comparison, to a recommendation and (optionally) a PDF report. Covers four purchasing surfaces: general consumer/business purchasing, spec-driven market landscape surveys, technical rig procurement, and vendor/content recommendations.
 
 Part of the [danielrosehill Claude Code marketplace](https://github.com/danielrosehill/Claude-Code-Plugins).
 
+## Which plugin do I want?
+
+This plugin is the **general, marketplace-agnostic** half of the buying stack. It is
+about the *process*: working out what the thing is, what it has to do, which
+candidates qualify, and which one to buy. It never assumes a particular shop.
+
+The **`shopping`** plugin and its regional and per-marketplace siblings are the other
+half. They are about *specific places*: how a given retailer's catalogue, language,
+currency, tax treatment and stock data actually work.
+
+| You are doing this | Use |
+| --- | --- |
+| I don't know what this thing is called, or what to search for | **`procurement-tools`** → `define-spec` |
+| Turning a want into a spec, then judging candidates against it | **`procurement-tools`** |
+| Surveying a whole product category before choosing | **`procurement-tools`** → `mkt-*` |
+| Planning a hardware build or rig | **`procurement-tools`** → `rig-*` |
+| Finding who stocks it locally, at what price, in stock when | **`shopping`** |
+| Israeli retailers, Hebrew terms, Zap, ILS, parallel imports | **`israel-shopping`** |
+| One named marketplace's search syntax and quirks | that marketplace's own plugin (`amazon-us`, `aliexpress-israel-skills`, `grainger`, …) |
+
+The two halves are designed to be installed together. Once a question narrows from
+"what should I buy" to "how does *this shop* work", the `marketplace-handoff` skill
+routes it out of here.
+
+## Spec definition
+
+The step before searching. You know roughly what you want but not what it is called,
+so you cannot search for it yet — you may only have a photograph of one.
+
+```
+/procurement-tools:define-spec
+```
+
+Give it a description, a photo, a listing that is close but wrong, or a part number.
+It produces two things:
+
+- **`spec.md`** — a vendor-neutral capability specification. What the thing must do,
+  its fit and interface constraints, and — importantly — what is *not* required, so
+  that incidental details of the example you showed don't silently become filters.
+- **`search-terms.md`** — the search vocabulary, grouped by register, with a bare
+  `search-terms.txt` alongside it for pasting straight into a search box.
+
+The vocabulary is grouped by register because register decides which half of the
+market a search reaches. The same object has a consumer name, a trade name, and
+often a spec code, and they return different catalogues at different prices. Each
+term is annotated with what it skews toward, which marketplaces it works on, and
+what noise to expect — including a **decoy terms** section for the strings that look
+correct and return the wrong thing.
+
 ## What you get
 
 ### Primitives (always available once the plugin is installed)
 
-**General-purchasing commands** (`/purchasing:*`):
+**General-purchasing commands** (`/procurement-tools:*`):
+- `define-spec` — turn a vague want (or a photograph) into a vendor-neutral spec **and** an annotated search vocabulary. See [Spec definition](#spec-definition).
 - `intake` — build the per-purchase spec (`spec.md`)
 - `research` — evaluate candidates against the spec
 - `compare` — side-by-side comparison of 2–4 shortlisted products
@@ -22,7 +72,7 @@ Part of the [danielrosehill Claude Code marketplace](https://github.com/danielro
 - `update-spec` — targeted edit to `spec.md`
 - `shop-setup` — configure the marketplaces, VPN egress and delivery addresses the price scanner uses
 
-**Market-landscape commands** (`/purchasing:mkt-*`):
+**Market-landscape commands** (`/procurement-tools:mkt-*`):
 - `mkt-spec` — requirement envelope + survey scope (capability-framed, no candidates)
 - `mkt-survey` — sweep the market and enumerate the field, breadth first
 - `mkt-segment` — derive the segments and the axes the market actually varies along
@@ -31,7 +81,7 @@ Part of the [danielrosehill Claude Code marketplace](https://github.com/danielro
 - `mkt-report` — the landscape report (markdown + PDF)
 - `mkt-refresh` — re-sweep later and report what changed
 
-**Tech-procurement commands** (`/purchasing:rig-*`):
+**Tech-procurement commands** (`/procurement-tools:rig-*`):
 - `rig-setup` — initial hardware-planning interview
 - `rig-profile` — document a specific machine's hardware
 - `rig-analyze` — identify bottlenecks and upgrade opportunities
@@ -39,7 +89,7 @@ Part of the [danielrosehill Claude Code marketplace](https://github.com/danielro
 - `rig-recommend` — generate upgrade recommendations
 - `rig-estimate` — produce a formal cost estimate document
 
-**Vendor-recommendations commands** (`/purchasing:rec-*`):
+**Vendor-recommendations commands** (`/procurement-tools:rec-*`):
 - `rec-onboard` — first-run preference capture (format + availability)
 - `rec-more-like-this` — similar-item recommendations from a seed
 - `rec-log-feedback` — record like / dislike on past recommendations and update the profile
@@ -53,7 +103,7 @@ Part of the [danielrosehill Claude Code marketplace](https://github.com/danielro
 ### Skills
 
 - **`price-scan`** — model-invocable. Scans a shortlist of product URLs for current price, stock, shipping and landed cost across your configured marketplaces, from your own machine with the VPN exit set to the country each shop requires. Runs inside any purchase-research repo and writes results there. See [Price scanning](#price-scanning).
-- **`/purchasing:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--private]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, and (by default) creates a public GitHub repo for it. `market-landscape` defaults to private.
+- **`/procurement-tools:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--private]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, and (by default) creates a public GitHub repo for it. `market-landscape` defaults to private.
 
 ## Price scanning
 
@@ -91,7 +141,7 @@ Set `auto_switch: false` to have the scanner stop and print the command instead 
 
 ### Public plugin, private config
 
-The plugin is public. Your delivery addresses, account details and VPN setup are not, so they live **outside any repo**, in the plugin data directory (`$CLAUDE_USER_DATA/purchasing/` → `$XDG_DATA_HOME/claude-plugins/purchasing/` → `~/.local/share/claude-plugins/purchasing/`):
+The plugin is public. Your delivery addresses, account details and VPN setup are not, so they live **outside any repo**, in the plugin data directory (`$CLAUDE_USER_DATA/procurement-tools/` → `$XDG_DATA_HOME/claude-plugins/procurement-tools/` → `~/.local/share/claude-plugins/procurement-tools/`):
 
 | File | Scope | Lives in |
 |---|---|---|
@@ -100,7 +150,7 @@ The plugin is public. Your delivery addresses, account details and VPN setup are
 | `price-watchlist.yaml` | The shortlist for one purchase | The purchase repo (committed) |
 | `data/price-scans/` | Scan reports + `price-history.csv` | The purchase repo (committed) |
 
-Documented examples for all three are in [`examples/`](examples/). Run `/purchasing:shop-setup` to generate the private pair by interview.
+Documented examples for all three are in [`examples/`](examples/). Run `/procurement-tools:shop-setup` to generate the private pair by interview.
 
 ### What it refuses to do
 
@@ -147,7 +197,7 @@ Via the danielrosehill marketplace:
 
 ```
 /plugin marketplace add danielrosehill/Claude-Code-Plugins
-/plugin install purchasing
+/plugin install procurement-tools@danielrosehill
 ```
 
 ## License

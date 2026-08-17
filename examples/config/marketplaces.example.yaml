@@ -2,14 +2,14 @@
 # it reaches them.
 #
 # THIS FILE IS AN EXAMPLE. The real one lives outside this repo, at:
-#   $CLAUDE_USER_DATA/purchasing/marketplaces.yaml
-#   -> $XDG_DATA_HOME/claude-plugins/purchasing/marketplaces.yaml
-#   -> ~/.local/share/claude-plugins/purchasing/marketplaces.yaml
+#   $CLAUDE_USER_DATA/procurement-tools/marketplaces.yaml
+#   -> $XDG_DATA_HOME/claude-plugins/procurement-tools/marketplaces.yaml
+#   -> ~/.local/share/claude-plugins/procurement-tools/marketplaces.yaml
 #
 # The plugin is public; your account details, delivery addresses and VPN setup
 # are not. Nothing here should ever be committed with real values in it.
 #
-# Generate the real one with /purchasing:shop-setup, or copy this and edit.
+# Generate the real one with /procurement-tools:shop-setup, or copy this and edit.
 
 version: 1
 

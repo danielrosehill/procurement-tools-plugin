@@ -53,7 +53,7 @@ Walk through standing prefs once. From then on, every new purchasing workspace a
 
 ### Option B — Local fallback
 
-Without Mem0 MCP, the commands save to `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA/purchasing/` — see the `meta-tools:plugin-data-storage` canonical skill) instead. Works within a single machine but doesn't sync. Install Mem0 MCP for cross-device persistence.
+Without Mem0 MCP, the commands save to `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA/procurement-tools/` — see the `meta-tools:plugin-data-storage` canonical skill) instead. Works within a single machine but doesn't sync. Install Mem0 MCP for cross-device persistence.
 
 ### Option C — No persistence
 

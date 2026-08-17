@@ -13,7 +13,7 @@ accumulate next to the research they inform.
 
 The plugin is public; the config it reads is not. Marketplaces, VPN setup and
 delivery addresses live in the plugin data directory outside any repo — see
-`/purchasing:shop-setup`.
+`/procurement-tools:shop-setup`.
 
 ## The one rule
 
@@ -28,10 +28,10 @@ reading reviews; they are not fine for pricing them.
 ## Prerequisites
 
 Config at `<plugin-data-dir>/marketplaces.yaml` and `addresses.yaml`, where
-`<plugin-data-dir>` resolves as `$CLAUDE_USER_DATA/purchasing/` →
-`$XDG_DATA_HOME/claude-plugins/purchasing/` →
-`~/.local/share/claude-plugins/purchasing/` (the convention the plugin's other
-commands use). If it's missing, run `/purchasing:shop-setup` first rather than
+`<plugin-data-dir>` resolves as `$CLAUDE_USER_DATA/procurement-tools/` →
+`$XDG_DATA_HOME/claude-plugins/procurement-tools/` →
+`~/.local/share/claude-plugins/procurement-tools/` (the convention the plugin's other
+commands use). If it's missing, run `/procurement-tools:shop-setup` first rather than
 guessing values.
 
 ## Flow
@@ -130,8 +130,8 @@ These matter more than completeness of the table:
 
 ## Relationship to the rest of the plugin
 
-`/purchasing:research` and `/purchasing:compare` decide *what to buy*; this skill
-establishes *what it costs to get it here, now*. `/purchasing:market-check` does
+`/procurement-tools:research` and `/procurement-tools:compare` decide *what to buy*; this skill
+establishes *what it costs to get it here, now*. `/procurement-tools:market-check` does
 the strategic version of the same question — local market versus international
 RRP with import realism — and reads the same config. Run this when the shortlist
 is settled and the question has become procurement rather than selection.

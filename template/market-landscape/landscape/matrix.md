@@ -1,6 +1,6 @@
 # Conformance Matrix
 
-*Every live option against every requirement. Maintained by `/purchasing:mkt-matrix`.*
+*Every live option against every requirement. Maintained by `/procurement-tools:mkt-matrix`.*
 
 **Field version**: `landscape/field.md` as of [Date] — [N] live entries
 **Built**: [Date]

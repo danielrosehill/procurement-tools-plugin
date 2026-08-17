@@ -7,7 +7,7 @@ allowed-tools: Bash(mkdir *), Bash(cp *), Bash(cat *), Bash(git init *), Bash(gi
 
 # Provision Purchasing Workspace
 
-Creates a new workspace for running a purchase decision, a market landscape survey, or a recommendation exercise. This plugin's commands (`/purchasing:intake`, `/purchasing:research`, `/purchasing:mkt-survey`, `/purchasing:rig-analyze`, `/purchasing:rec-more-like-this`, etc.) are globally available once installed — this skill only provisions the **data scaffold** (CLAUDE.md, spec.md, context/, memory/, etc.) that those commands read from and write to.
+Creates a new workspace for running a purchase decision, a market landscape survey, or a recommendation exercise. This plugin's commands (`/procurement-tools:intake`, `/procurement-tools:research`, `/procurement-tools:mkt-survey`, `/procurement-tools:rig-analyze`, `/procurement-tools:rec-more-like-this`, etc.) are globally available once installed — this skill only provisions the **data scaffold** (CLAUDE.md, spec.md, context/, memory/, etc.) that those commands read from and write to.
 
 ## Picking the variant
 
@@ -31,11 +31,11 @@ If it's ambiguous, ask which — the two workspaces are shaped in opposite direc
 ### Examples
 
 ```
-/purchasing:new-workspace new-laptop-2026
-/purchasing:new-workspace wearable-mic-landscape --variant=market-landscape
-/purchasing:new-workspace workstation-rig --variant=tech-procurement
-/purchasing:new-workspace podcast-picks --variant=vendor-recommendations --private
-/purchasing:new-workspace scratch-buy --local-only
+/procurement-tools:new-workspace new-laptop-2026
+/procurement-tools:new-workspace wearable-mic-landscape --variant=market-landscape
+/procurement-tools:new-workspace workstation-rig --variant=tech-procurement
+/procurement-tools:new-workspace podcast-picks --variant=vendor-recommendations --private
+/procurement-tools:new-workspace scratch-buy --local-only
 ```
 
 ## Procedure
@@ -73,10 +73,10 @@ Open the new workspace's `CLAUDE.md` and:
 
 Ask the user only for facts this plugin can't infer:
 
-- **general-purchasing**: what the user is buying (category + primary use case). Write into `spec.md` under "What I'm buying". Remind them they can run `/purchasing:intake` to complete the spec interactively.
-- **market-landscape**: the requirement in one line, capability-framed (what has to be possible, not which product). Write into `spec.md` under "The requirement". Don't ask for candidates — naming products at provisioning time anchors the sweep to them. Remind them to run `/purchasing:mkt-spec` to set the requirement envelope and the survey scope.
-- **tech-procurement**: the target machine label (e.g. `workstation`, `gaming-pc`). Remind them to run `/purchasing:rig-setup` then `/purchasing:rig-profile` to build hardware context.
-- **vendor-recommendations**: the format(s) they want recommendations for (films, podcasts, books, etc.). Remind them to run `/purchasing:rec-onboard` to capture preferences.
+- **general-purchasing**: what the user is buying (category + primary use case). Write into `spec.md` under "What I'm buying". Remind them they can run `/procurement-tools:intake` to complete the spec interactively.
+- **market-landscape**: the requirement in one line, capability-framed (what has to be possible, not which product). Write into `spec.md` under "The requirement". Don't ask for candidates — naming products at provisioning time anchors the sweep to them. Remind them to run `/procurement-tools:mkt-spec` to set the requirement envelope and the survey scope.
+- **tech-procurement**: the target machine label (e.g. `workstation`, `gaming-pc`). Remind them to run `/procurement-tools:rig-setup` then `/procurement-tools:rig-profile` to build hardware context.
+- **vendor-recommendations**: the format(s) they want recommendations for (films, podcasts, books, etc.). Remind them to run `/procurement-tools:rec-onboard` to capture preferences.
 
 ### 7. Initialise git and (optionally) publish
 
@@ -102,10 +102,10 @@ Tell the user:
 - Workspace path.
 - Variant chosen.
 - Which plugin commands apply:
-  - **general-purchasing** → `/purchasing:intake`, `/purchasing:research`, `/purchasing:compare`, `/purchasing:recommend`, `/purchasing:market-check`, `/purchasing:load-preferences`, `/purchasing:save-preferences`.
-  - **market-landscape** → `/purchasing:mkt-spec`, `/purchasing:mkt-survey`, `/purchasing:mkt-segment`, `/purchasing:mkt-matrix`, `/purchasing:mkt-gaps`, `/purchasing:mkt-report`, `/purchasing:mkt-refresh`. Note that `/purchasing:intake`, `/purchasing:research` and `/purchasing:recommend` are deliberately *not* part of this flow — they drive toward a pick.
-  - **tech-procurement** → `/purchasing:rig-setup`, `/purchasing:rig-profile`, `/purchasing:rig-analyze`, `/purchasing:rig-compare`, `/purchasing:rig-recommend`, `/purchasing:rig-estimate`.
-  - **vendor-recommendations** → `/purchasing:rec-onboard`, `/purchasing:rec-more-like-this`, `/purchasing:rec-log-feedback`, `/purchasing:rec-opml-ingest`, `/purchasing:rec-reading-list-ingest`, `/purchasing:rec-watch-history-ingest`, `/purchasing:rec-list`.
+  - **general-purchasing** → `/procurement-tools:intake`, `/procurement-tools:research`, `/procurement-tools:compare`, `/procurement-tools:recommend`, `/procurement-tools:market-check`, `/procurement-tools:load-preferences`, `/procurement-tools:save-preferences`.
+  - **market-landscape** → `/procurement-tools:mkt-spec`, `/procurement-tools:mkt-survey`, `/procurement-tools:mkt-segment`, `/procurement-tools:mkt-matrix`, `/procurement-tools:mkt-gaps`, `/procurement-tools:mkt-report`, `/procurement-tools:mkt-refresh`. Note that `/procurement-tools:intake`, `/procurement-tools:research` and `/procurement-tools:recommend` are deliberately *not* part of this flow — they drive toward a pick.
+  - **tech-procurement** → `/procurement-tools:rig-setup`, `/procurement-tools:rig-profile`, `/procurement-tools:rig-analyze`, `/procurement-tools:rig-compare`, `/procurement-tools:rig-recommend`, `/procurement-tools:rig-estimate`.
+  - **vendor-recommendations** → `/procurement-tools:rec-onboard`, `/procurement-tools:rec-more-like-this`, `/procurement-tools:rec-log-feedback`, `/procurement-tools:rec-opml-ingest`, `/procurement-tools:rec-reading-list-ingest`, `/procurement-tools:rec-watch-history-ingest`, `/procurement-tools:rec-list`.
 - Reminder that the workspace is **data** — it can be deleted or moved freely without losing the plugin's commands.
 
 ## Notes

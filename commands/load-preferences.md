@@ -11,7 +11,7 @@ If a legacy file exists AND the corresponding file at the new path does NOT exis
 
 ## Path resolution
 
-Resolve the plugin's data directory as `$CLAUDE_USER_DATA/purchasing/` if `CLAUDE_USER_DATA` is set; otherwise `$XDG_DATA_HOME/claude-plugins/purchasing/` if `XDG_DATA_HOME` is set; otherwise `~/.local/share/claude-plugins/purchasing/`. Create the directory if it doesn't exist. See the canonical convention in the `meta-tools:plugin-data-storage` skill. The local preferences file lives at `<plugin-data-dir>/shopping-preferences.md`.
+Resolve the plugin's data directory as `$CLAUDE_USER_DATA/procurement-tools/` if `CLAUDE_USER_DATA` is set; otherwise `$XDG_DATA_HOME/claude-plugins/procurement-tools/` if `XDG_DATA_HOME` is set; otherwise `~/.local/share/claude-plugins/procurement-tools/`. Create the directory if it doesn't exist. See the canonical convention in the `meta-tools:plugin-data-storage` skill. The local preferences file lives at `<plugin-data-dir>/shopping-preferences.md`.
 
 ## What "standing preferences" means
 

@@ -34,7 +34,7 @@ The recommended memory backend is [Mem0](https://mem0.ai) exposed as an MCP serv
 
 If Mem0 MCP isn't available, the commands fall back to:
 
-1. A local file: `<plugin-data-dir>/shopping-preferences.md` — resolved via `$CLAUDE_USER_DATA/purchasing/` (see the `meta-tools:plugin-data-storage` canonical skill)
+1. A local file: `<plugin-data-dir>/shopping-preferences.md` — resolved via `$CLAUDE_USER_DATA/procurement-tools/` (see the `meta-tools:plugin-data-storage` canonical skill)
 2. Inline prompting during `/intake` (last resort — user will be re-asked each time)
 
 The templates degrade gracefully. Mem0 is the "power user" path.

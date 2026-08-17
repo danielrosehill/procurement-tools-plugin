@@ -11,7 +11,7 @@ If `$ARGUMENTS` names a segment, category or vendor, sweep only that and append.
 
 ## Prerequisites
 
-`spec.md` Status must be "Configured" — if not, run `/purchasing:mkt-spec` first. Read the requirement, the must-haves, the hard nos, the **survey scope table** and the **adjacent categories** before starting. The scope table is what stops the sweep; the adjacent categories are what stop it being wrong.
+`spec.md` Status must be "Configured" — if not, run `/procurement-tools:mkt-spec` first. Read the requirement, the must-haves, the hard nos, the **survey scope table** and the **adjacent categories** before starting. The scope table is what stops the sweep; the adjacent categories are what stop it being wrong.
 
 ## The rule that governs this command
 
@@ -67,4 +67,4 @@ Update `landscape/field.md`: the tables, the entry counts, the sweep log row for
 
 Then print: how many entries by status, what the sweep added beyond the user's known starting points, anything surprising (an empty segment, a dead category, a rebadge cluster), and what's still unswept.
 
-Next: `/purchasing:mkt-segment`.
+Next: `/procurement-tools:mkt-segment`.

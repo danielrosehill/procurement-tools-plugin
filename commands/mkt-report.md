@@ -65,10 +65,10 @@ Write `outputs/landscape-YYYY-MM-DD.md`. Unless `--md-only`:
 
 Compile to `outputs/landscape-YYYY-MM-DD.pdf`, keeping the `.typ` source alongside. Wide conformance matrices want landscape orientation or a smaller size on that page — check the compiled PDF rather than assuming it fits.
 
-Never overwrite a previous report. Dated files accumulate; `/purchasing:mkt-refresh` diffs against them.
+Never overwrite a previous report. Dated files accumulate; `/procurement-tools:mkt-refresh` diffs against them.
 
 ## Finally
 
 Print the path, the short answer from section 2, and the offer to hand off:
 
-> "If you want to move to buying: `/purchasing:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private`, carrying the shortlist and requirements across. This repo stays as the standing map."
+> "If you want to move to buying: `/procurement-tools:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private`, carrying the shortlist and requirements across. This repo stays as the standing map."

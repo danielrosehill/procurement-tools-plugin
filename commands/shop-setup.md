@@ -5,14 +5,14 @@ argument-hint: [nothing — this command interviews you]
 
 # Shop Setup — Configure Marketplaces, Egress and Delivery Addresses
 
-Writes the two config files the `price-scan` skill and `/purchasing:market-check`
+Writes the two config files the `price-scan` skill and `/procurement-tools:market-check`
 depend on. Run once, then edit when a shop, address or VPN changes.
 
 ## Where the config goes — and where it must not
 
-Resolve `<plugin-data-dir>` as `$CLAUDE_USER_DATA/purchasing/` if set; otherwise
-`$XDG_DATA_HOME/claude-plugins/purchasing/`; otherwise
-`~/.local/share/claude-plugins/purchasing/`. Create it if absent. This is the
+Resolve `<plugin-data-dir>` as `$CLAUDE_USER_DATA/procurement-tools/` if set; otherwise
+`$XDG_DATA_HOME/claude-plugins/procurement-tools/`; otherwise
+`~/.local/share/claude-plugins/procurement-tools/`. Create it if absent. This is the
 same convention `/load-preferences` uses, so all the plugin's user data sits
 together.
 

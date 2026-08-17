@@ -1,6 +1,6 @@
 # Segments and Variation Axes
 
-*How this market actually divides. Maintained by `/purchasing:mkt-segment`.*
+*How this market actually divides. Maintained by `/procurement-tools:mkt-segment`.*
 
 **Derived from**: `landscape/field.md` as of [Date] ([N] entries)
 

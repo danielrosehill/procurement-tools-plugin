@@ -1,6 +1,6 @@
 # Gaps and Compromises
 
-*What the spec asks for that the market doesn't supply, and what it asks for that everything supplies. Maintained by `/purchasing:mkt-gaps`.*
+*What the spec asks for that the market doesn't supply, and what it asks for that everything supplies. Maintained by `/procurement-tools:mkt-gaps`.*
 
 **Derived from**: `landscape/field.md` + the conformance matrix, as of [Date]
 
@@ -70,7 +70,7 @@
 |---|---|---|---|
 | [Name] | [Segment] | [Which requirements it clears that others don't] | [What still needs checking — price, availability, an unverified spec] |
 
-**Hand-off**: `/purchasing:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private`, carrying this table and the requirements from `spec.md`.
+**Hand-off**: `/procurement-tools:new-workspace <thing>-purchase-MMDD --variant=general-purchasing --private`, carrying this table and the requirements from `spec.md`.
 
 ---
 

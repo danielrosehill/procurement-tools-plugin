@@ -23,7 +23,7 @@ still written — this means "needs a browser pass", not "crashed"); 2 config or
 watchlist missing; 3 PyYAML missing.
 
 Config lives outside this repo. See `examples/config/` for the shape and
-`/purchasing:shop-setup` to generate it.
+`/procurement-tools:shop-setup` to generate it.
 """
 
 from __future__ import annotations
@@ -69,11 +69,11 @@ def plugin_data_dir() -> pathlib.Path:
     addresses and account details are not.
     """
     if os.environ.get("CLAUDE_USER_DATA"):
-        base = pathlib.Path(os.environ["CLAUDE_USER_DATA"]) / "purchasing"
+        base = pathlib.Path(os.environ["CLAUDE_USER_DATA"]) / "procurement-tools"
     elif os.environ.get("XDG_DATA_HOME"):
-        base = pathlib.Path(os.environ["XDG_DATA_HOME"]) / "claude-plugins" / "purchasing"
+        base = pathlib.Path(os.environ["XDG_DATA_HOME"]) / "claude-plugins" / "procurement-tools"
     else:
-        base = pathlib.Path.home() / ".local" / "share" / "claude-plugins" / "purchasing"
+        base = pathlib.Path.home() / ".local" / "share" / "claude-plugins" / "procurement-tools"
     return base
 
 
@@ -575,7 +575,7 @@ def main() -> int:
 
     if not marketplaces:
         print(f"No config at {plugin_data_dir() / MARKETPLACES_FILE}\n"
-              f"Run /purchasing:shop-setup, or copy examples/config/*.example.yaml there.",
+              f"Run /procurement-tools:shop-setup, or copy examples/config/*.example.yaml there.",
               file=sys.stderr)
         return 2
 

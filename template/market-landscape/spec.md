@@ -1,6 +1,6 @@
 # Survey Spec
 
-*The source of truth for **this survey**. One repo = one spec. Populate via `/purchasing:mkt-spec`, or edit directly.*
+*The source of truth for **this survey**. One repo = one spec. Populate via `/procurement-tools:mkt-spec`, or edit directly.*
 
 *This is a **requirement**, not a product. Describe the capability you need and the boundary of the sweep — not a candidate you already have in mind.*
 
@@ -105,4 +105,4 @@
 
 ---
 
-*Spec populated via `/purchasing:mkt-spec`. Edit with `/purchasing:update-spec <change>`.*
+*Spec populated via `/procurement-tools:mkt-spec`. Edit with `/procurement-tools:update-spec <change>`.*

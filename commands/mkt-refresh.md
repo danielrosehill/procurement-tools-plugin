@@ -11,11 +11,11 @@ Re-run the sweep against an existing field and report the delta. This is why a l
 
 Take the date from `$ARGUMENTS`, or the most recent report in `outputs/`. Read that report, `landscape/field.md` and `landscape/gaps.md` as they stand. Note the baseline sweep date and entry counts before changing anything.
 
-Re-read `spec.md` too, and ask whether the requirement still holds. Requirements drift — a spec written a year ago may have constraints that no longer apply, or a new hard no. Update via `/purchasing:update-spec` before sweeping if so, and record that the spec changed, because it will explain part of the delta.
+Re-read `spec.md` too, and ask whether the requirement still holds. Requirements drift — a spec written a year ago may have constraints that no longer apply, or a new hard no. Update via `/procurement-tools:update-spec` before sweeping if so, and record that the spec changed, because it will explain part of the delta.
 
 ## Sweep
 
-Run the `/purchasing:mkt-survey` procedure again against the same scope. Additionally, for every existing entry:
+Run the `/procurement-tools:mkt-survey` procedure again against the same scope. Additionally, for every existing entry:
 
 - **Still available?** Discontinued entries move to the dead table with the approximate date and successor.
 - **Still meets the spec?** Firmware, licensing and business-model changes move options between live and excluded without any hardware changing. A feature moved behind a subscription is a status change.

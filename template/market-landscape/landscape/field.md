@@ -1,6 +1,6 @@
 # The Field
 
-*Every option found, whether or not it survives the spec. Maintained by `/purchasing:mkt-survey` and `/purchasing:mkt-refresh`.*
+*Every option found, whether or not it survives the spec. Maintained by `/procurement-tools:mkt-survey` and `/procurement-tools:mkt-refresh`.*
 
 **Last swept**: [Date]
 **Sweep status**: [In progress / Complete — with the termination condition from `spec.md` that was met]

@@ -6,7 +6,7 @@ allowed-tools: Read, WebSearch, Bash(ls *)
 
 # Marketplace handoff
 
-`purchasing` is the **generalist** ecommerce research plugin: intake, specs,
+`procurement-tools` is the **generalist** ecommerce research plugin: intake, specs,
 cross-vendor comparison, evaluation, recommendations, preference memory. It is
 deliberately marketplace-agnostic, and it should stay that way.
 
