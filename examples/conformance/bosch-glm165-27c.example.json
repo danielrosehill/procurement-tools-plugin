@@ -1,0 +1,129 @@
+{
+  "conformance_version": 1,
+  "spec": { "id": "laser-measure-2026-08", "revision": 3 },
+  "candidate": {
+    "id": "bosch-glm165-27c",
+    "name": "Bosch GLM165-27C",
+    "manufacturer": "Bosch",
+    "part_number": "GLM165-27C",
+    "region": "US",
+    "equivalence_ref": "data/equivalence/bosch-glm-165.json",
+    "datasheet_ref": "data/datasheets/bosch-glm165-27c.json",
+    "status": "live"
+  },
+  "evaluated": "2026-08-21",
+  "evaluated_by": "spec-verification subagent",
+  "notes": "ILLUSTRATIVE SHAPE ONLY. The verdicts and quotes below are placeholders showing what a filled record looks like; none of them were verified and this file must never be cited as evidence about a real product.",
+  "cells": [
+    {
+      "req": "REQ-001",
+      "verdict": "pass",
+      "value": "Bluetooth LE",
+      "source": {
+        "type": "datasheet",
+        "document": "Operating instructions",
+        "doc_revision": "EXAMPLE-REV",
+        "page": 12,
+        "quote": "EXAMPLE — the line the verdict rests on, verbatim",
+        "retrieved": "2026-08-21",
+        "egress": "us"
+      }
+    },
+    {
+      "req": "REQ-002",
+      "verdict": "pass",
+      "value": "indirect height, indirect width, double indirect",
+      "source": {
+        "type": "manual",
+        "document": "Operating instructions",
+        "doc_revision": "EXAMPLE-REV",
+        "page": 18,
+        "retrieved": "2026-08-21"
+      },
+      "note": "The manual names each geometry; the product page said only 'advanced functions'."
+    },
+    {
+      "req": "REQ-003",
+      "verdict": "pass",
+      "value": 50,
+      "source": {
+        "type": "datasheet",
+        "document": "Technical data",
+        "doc_revision": "EXAMPLE-REV",
+        "retrieved": "2026-08-21"
+      },
+      "note": "Quoted under favourable conditions; the condition travels with the number."
+    },
+    {
+      "req": "REQ-004",
+      "verdict": "partial",
+      "value": "±2 mm typical to 10 m, worse beyond",
+      "source": {
+        "type": "datasheet",
+        "document": "Technical data",
+        "doc_revision": "EXAMPLE-REV",
+        "retrieved": "2026-08-21"
+      },
+      "note": "Condition: the ±2 mm figure applies to 10 m only; the datasheet quotes a wider tolerance past that. A partial is only a partial because this condition is stated."
+    },
+    {
+      "req": "REQ-005",
+      "verdict": "partial",
+      "value": "supported, manual protocol selection",
+      "source": {
+        "type": "third-party-test",
+        "document": "Annotation app compatibility list",
+        "retrieved": "2026-08-21"
+      },
+      "note": "Condition: the protocol must be chosen by hand in the app; it is not auto-detected."
+    },
+    {
+      "req": "REQ-006",
+      "verdict": "pass",
+      "source": {
+        "type": "manual",
+        "document": "Operating instructions",
+        "doc_revision": "EXAMPLE-REV",
+        "retrieved": "2026-08-21"
+      },
+      "note": "Read as compliance: the disqualifying characteristic (app lock) is absent."
+    },
+    {
+      "req": "REQ-007",
+      "verdict": "unknown",
+      "source": {
+        "type": "manufacturer-page",
+        "retrieved": "2026-08-21",
+        "egress": "us"
+      },
+      "resolves_to": "Whether the model is still in the maker's current regional catalogue. Retail stock does not answer this — ask the distributor.",
+      "note": "Left unknown rather than passed on the strength of it being widely in stock."
+    },
+    {
+      "req": "REQ-008",
+      "verdict": "pass",
+      "value": "AA alkaline",
+      "source": {
+        "type": "datasheet",
+        "document": "Technical data",
+        "doc_revision": "EXAMPLE-REV",
+        "retrieved": "2026-08-21"
+      }
+    },
+    {
+      "req": "REQ-009",
+      "verdict": "pass",
+      "value": "IP54",
+      "source": {
+        "type": "datasheet",
+        "document": "Technical data",
+        "doc_revision": "EXAMPLE-REV",
+        "retrieved": "2026-08-21"
+      }
+    }
+  ],
+  "open_questions": [
+    "REQ-007 — catalogue status needs a distributor answer.",
+    "REQ-004 — confirm whether the wider tolerance past 10 m matters for the actual measurements."
+  ]
+}

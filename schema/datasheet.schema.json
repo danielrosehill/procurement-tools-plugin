@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/datasheet.schema.json",
+  "title": "procurement-tools datasheet record",
+  "description": "What the manufacturer's own documentation says about one part number, with the document it came from. Written by the spec-sheet-retrieval skill to data/datasheets/<manufacturer>-<part-number>.json. The point of the record is provenance: a spec value with no document behind it is an unknown, not a value.",
+  "type": "object",
+  "required": ["datasheet_version", "part_number", "manufacturer", "retrieved", "documents", "specs"],
+  "additionalProperties": false,
+  "properties": {
+    "datasheet_version": { "type": "integer", "const": 1 },
+    "manufacturer": { "type": "string" },
+    "part_number": { "type": "string", "description": "Exactly as the manufacturer writes it, including spacing and suffixes. 'GLM 165-27C' and 'GLM165-27C' are recorded as written and reconciled in aliases." },
+    "aliases": { "type": "array", "items": { "type": "string" }, "description": "Other spellings of the same part number seen in the wild: retailer SKUs, spacing variants, EAN/UPC, distributor order codes." },
+    "product_name": { "type": "string" },
+    "region": { "type": "string", "description": "Region this part number is sold in. Regional siblings get their own record; see the equivalence record for the link." },
+    "status": { "type": "string", "enum": ["current", "discontinued", "announced", "unknown"], "default": "unknown" },
+    "successor": { "type": "string" },
+    "retrieved": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "egress": { "type": "string", "description": "Country the fetch left from. Manufacturer sites serve different documents per region; a spec sheet fetched from the wrong country is a different document that looks like the right one." },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The documents the specs were read from. An empty list means the skill found nothing and the record should say so rather than being filled from a retailer.",
+      "items": {
+        "type": "object",
+        "required": ["type", "url"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "enum": ["datasheet", "manual", "quick-start", "declaration-of-conformity", "certification", "catalogue-page", "manufacturer-page", "cad", "firmware-notes", "safety-sheet"] },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "doc_revision": { "type": "string", "description": "The document's own revision or print code, e.g. '1 609 92A 8XZ (2024.03)'. Not the retrieval date." },
+          "language": { "type": "string" },
+          "local_path": { "type": "string", "description": "Where the PDF was saved in the repo, when it was saved." },
+          "sha256": { "type": "string", "description": "Of the saved file. Manufacturers replace documents at the same URL without changing the filename." },
+          "accessed_via": { "type": "string", "description": "Which route got it: WebFetch, geo-egress il/us, playwright, claude-in-chrome, distributor mirror." }
+        }
+      }
+    },
+    "specs": {
+      "type": "array",
+      "description": "One entry per published value. Values are copied, not paraphrased, and units are kept as printed.",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "parameter": { "type": "string" },
+          "value": {},
+          "unit": { "type": "string" },
+          "condition": { "type": "string", "description": "The qualifier the headline number hides: accuracy 'under favourable conditions', range 'with target plate', runtime 'at 20 degC'." },
+          "document": { "type": "string", "description": "Which of documents[] this came from — title or url." },
+          "page": { "type": ["string", "number"] },
+          "quote": { "type": "string" },
+          "req": { "type": "string", "pattern": "^REQ-[0-9]{3,}$", "description": "Requirement this value answers, when the retrieval was driven by a spec." }
+        }
+      }
+    },
+    "not_published": {
+      "type": "array",
+      "description": "Parameters that were looked for and are genuinely absent from the manufacturer's documentation. Recording the absence stops the next agent repeating the search, and an absence across a whole field is itself a finding.",
+      "items": {
+        "type": "object",
+        "required": ["parameter"],
+        "additionalProperties": false,
+        "properties": {
+          "parameter": { "type": "string" },
+          "req": { "type": "string" },
+          "searched": { "type": "array", "items": { "type": "string" } },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "description": "Where the manufacturer's own documents disagree with each other, or where a widely-repeated retail figure differs from the datasheet. Both values are kept.",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "values"],
+        "additionalProperties": false,
+        "properties": {
+          "parameter": { "type": "string" },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "value": {},
+                "unit": { "type": "string" },
+                "source": { "type": "string" },
+                "doc_revision": { "type": "string" }
+              }
+            }
+          },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

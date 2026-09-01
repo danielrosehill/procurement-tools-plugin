@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/spec.schema.json",
+  "title": "procurement-tools spec-as-code",
+  "description": "Machine-readable requirement set for one purchase or one market survey. Written as YAML (spec.yaml), validated and rendered by scripts/spec_tools.py. Requirement IDs are stable across revisions and are the join key used by conformance records, BOM lines and RFQ line items.",
+  "type": "object",
+  "required": ["spec_version", "id", "title", "revision", "requirements"],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "integer",
+      "description": "Version of THIS file format, not of the spec. Currently 1.",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable slug for the spec, e.g. 'laser-measure-2026-08'. Referenced by conformance records and BOM lines.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "title": { "type": "string" },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Increments on every change that alters what would pass. Conformance records pin the revision they were evaluated against, so a bump invalidates nothing silently."
+    },
+    "revised": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "frozen", "superseded"],
+      "default": "draft",
+      "description": "frozen = no further changes while a purchase is in flight. superseded = a later spec replaces it; name it in supersedes_note."
+    },
+    "supersedes_note": { "type": "string" },
+    "scope": {
+      "type": "string",
+      "description": "What is being specified, in capability terms. Vendor-neutral: no product may appear here."
+    },
+    "out_of_scope": {
+      "type": "array",
+      "description": "What this spec deliberately does NOT constrain. Load-bearing: it stops incidental attributes of an example product being promoted to requirements downstream.",
+      "items": { "type": "string" }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "budget_target": { "type": ["number", "string"] },
+        "budget_ceiling": { "type": ["number", "string"] },
+        "currency": { "type": "string" },
+        "destination": { "type": "string", "description": "Address profile id, matching addresses.yaml used by price-scan." },
+        "required_by": { "type": "string" },
+        "quantity": { "type": ["number", "string"] }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "history": {
+      "type": "array",
+      "description": "One entry per revision. Append-only.",
+      "items": {
+        "type": "object",
+        "required": ["revision", "change"],
+        "additionalProperties": false,
+        "properties": {
+          "revision": { "type": "integer" },
+          "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          "change": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "required": ["id", "kind", "statement", "verify"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^REQ-[0-9]{3,}$",
+          "description": "Allocated sequentially and NEVER reused, even after retirement. This is the join key across every other artefact."
+        },
+        "title": { "type": "string", "description": "Short column header for the matrix. Defaults to a truncation of the statement." },
+        "kind": {
+          "type": "string",
+          "enum": ["must", "must-not", "nice"],
+          "description": "must = disqualifying if absent. must-not = disqualifying if present. nice = tie-breaker, never disqualifies and never scores."
+        },
+        "statement": {
+          "type": "string",
+          "description": "The requirement in one sentence, phrased as a property of the product rather than of a purchase. Written so a subagent that has never seen this repo can judge it."
+        },
+        "parameter": { "type": "string", "description": "The measurable attribute, when there is one, e.g. 'bluetooth_profile', 'max_range', 'ip_rating'." },
+        "operator": {
+          "type": "string",
+          "enum": ["exists", "absent", "eq", "ne", "gte", "lte", "in", "range", "matches"],
+          "description": "Only meaningful alongside parameter. Makes the requirement checkable rather than arguable."
+        },
+        "value": { "description": "Scalar, list (for 'in'), or two-element list (for 'range')." },
+        "unit": { "type": "string" },
+        "verify": {
+          "type": "string",
+          "enum": ["datasheet", "manual", "standard", "vendor-confirmation", "hands-on", "third-party-test", "review-consensus", "inspection"],
+          "description": "The evidence class that SETTLES this requirement. Anything weaker leaves the cell unknown rather than passing it."
+        },
+        "evidence": {
+          "type": "string",
+          "description": "What specifically would settle it — the datasheet field, the manual section, the standard clause, the question to ask the vendor. This is the sentence a research subagent acts on."
+        },
+        "rejects": {
+          "type": "string",
+          "description": "Evidence that looks sufficient and is not. Retail bullet points, marketing copy, a spec repeated across roundups from one wrong original."
+        },
+        "rationale": { "type": "string", "description": "Why this is required. Read when deciding whether to relax it." },
+        "added_in": { "type": "integer", "description": "Spec revision this requirement first appeared in." },
+        "retired": { "type": "boolean", "default": false, "description": "Requirements are retired, never deleted, so historic conformance records stay interpretable." },
+        "retired_in": { "type": "integer" },
+        "retired_reason": { "type": "string" }
+      }
+    }
+  }
+}

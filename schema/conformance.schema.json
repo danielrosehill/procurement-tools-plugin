@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/conformance.schema.json",
+  "title": "procurement-tools conformance record",
+  "description": "One candidate judged against one revision of one spec. Written by the evaluation-matrix skill, one file per candidate under evaluation/conformance/. Deliberately per-candidate rather than one big table so that independent subagents can each write one without colliding.",
+  "type": "object",
+  "required": ["conformance_version", "spec", "candidate", "evaluated", "cells"],
+  "additionalProperties": false,
+  "properties": {
+    "conformance_version": { "type": "integer", "const": 1 },
+    "spec": {
+      "type": "object",
+      "required": ["id", "revision"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "revision": { "type": "integer", "description": "The spec revision this was judged against. If the spec has moved on, the record is stale and says so rather than being silently reused." }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "name": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "part_number": { "type": "string" },
+        "region": { "type": "string", "description": "Region the part number belongs to. A US part number and its EU sibling are separate candidates unless part-number-equivalence has confirmed them identical." },
+        "equivalence_ref": { "type": "string", "description": "Path to the equivalence record, when this candidate is a regional sibling of another." },
+        "datasheet_ref": { "type": "string", "description": "Path to the datasheet record produced by spec-sheet-retrieval." },
+        "status": { "type": "string", "enum": ["live", "discontinued", "announced", "unavailable-in-region"], "default": "live" }
+      }
+    },
+    "evaluated": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "evaluated_by": { "type": "string", "description": "Agent or person. Useful when several subagents filled different rows." },
+    "cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["req", "verdict"],
+        "additionalProperties": false,
+        "properties": {
+          "req": { "type": "string", "pattern": "^REQ-[0-9]{3,}$" },
+          "verdict": {
+            "type": "string",
+            "enum": ["pass", "fail", "partial", "unknown"],
+            "description": "unknown is a real answer and outranks a guess. partial requires a condition in note."
+          },
+          "value": { "description": "The observed value, in the requirement's unit. Present even on a pass — the number is what a later reader checks." },
+          "source": { "$ref": "#/$defs/source" },
+          "conflicting_sources": {
+            "type": "array",
+            "description": "Populated when sources disagree. A contested spec is recorded as unknown WITH both sources, never resolved by picking the nicer number.",
+            "items": { "$ref": "#/$defs/source" }
+          },
+          "note": { "type": "string" },
+          "resolves_to": { "type": "string", "description": "On unknown: what would settle it. A question for the vendor, a document that does not exist, a test only hands-on use answers." }
+        }
+      }
+    },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["datasheet", "manual", "manufacturer-page", "standard", "vendor-email", "vendor-call", "distributor-listing", "retail-listing", "third-party-test", "review", "hands-on", "inference"],
+          "description": "Ranked in the evidence table in skills/evaluation-matrix/SKILL.md. retail-listing and review never settle a must on their own."
+        },
+        "url": { "type": "string" },
+        "document": { "type": "string", "description": "Document title or filename." },
+        "doc_revision": { "type": "string", "description": "The datasheet's own revision/date stamp, which is not the same as when you fetched it." },
+        "page": { "type": ["string", "number"] },
+        "quote": { "type": "string", "description": "The line the verdict rests on, verbatim." },
+        "retrieved": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "egress": { "type": "string", "description": "Which country the fetch left from, where that changes the content (regional catalogues, regional spec variants)." }
+      }
+    }
+  }
+}

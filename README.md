@@ -18,6 +18,9 @@ currency, tax treatment and stock data actually work.
 | --- | --- |
 | I don't know what this thing is called, or what to search for | **`procurement-tools`** → `define-spec` |
 | Turning a want into a spec, then judging candidates against it | **`procurement-tools`** |
+| Specifications decide the purchase, not price or reviews | **`procurement-tools`** → `technical-sourcing` |
+| Chasing a manufacturer datasheet, or a part number across regions | **`procurement-tools`** → `spec-sheet-retrieval`, `part-number-equivalence` |
+| A multi-item list going to suppliers for quotes | **`procurement-tools`** → `bom-build`, `rfq-package` |
 | Surveying a whole product category before choosing | **`procurement-tools`** → `mkt-*` |
 | Planning a hardware build or rig | **`procurement-tools`** → `rig-*` |
 | Finding who stocks it locally, at what price, in stock when | **`shopping`** |
@@ -102,8 +105,111 @@ correct and return the wrong thing.
 
 ### Skills
 
+All model-invocable, so a subagent can reach for them mid-task.
+
+**Technical-sourcing toolkit** — atomic and composable; each is usable alone, and they chain through shared file formats. See [Technical sourcing](#technical-sourcing).
+
+- **`technical-sourcing`** — the meta skill. Sequences the six below and says which steps this purchase can skip.
+- **`spec-as-code`** — versioned `spec.yaml` with stable requirement ids.
+- **`spec-sheet-retrieval`** — the manufacturer's own documentation, with the document and revision behind every value.
+- **`part-number-equivalence`** — which part numbers name the same product across regions and brands, and which look identical and are not.
+- **`evaluation-matrix`** — conformance checking against the spec: pass / fail / partial / unknown, never a score.
+- **`bom-build`** — a shopping list written as requirements rather than products.
+- **`rfq-package`** — a BOM projected onto a supplier request.
+
+**Everything else:**
+
 - **`price-scan`** — model-invocable. Scans a shortlist of product URLs for current price, stock, shipping and landed cost across your configured marketplaces, from your own machine with the VPN exit set to the country each shop requires. Runs inside any purchase-research repo and writes results there. See [Price scanning](#price-scanning).
 - **`/procurement-tools:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--private]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, and (by default) creates a public GitHub repo for it. `market-landscape` defaults to private.
+
+## Technical sourcing
+
+The half of purchasing where **conformity to a specification decides the buy** and
+price is a constraint rather than the question. Most of the market fails the
+requirements; the work is finding the ones that do not, and proving it.
+
+```
+/procurement-tools:define-spec ──▶ spec-as-code ──▶ evaluation-matrix ──▶ recommend
+                                    spec.yaml        criteria.md           │
+                                    REQ ids          conformance/*.json    │
+                                        │            matrix.md             │
+                                        ▼                ▲                 ▼
+                                   bom-build ────────────┤            price-scan
+                                   bom.yaml, LINE ids    │
+                                        │                │
+                                        ▼                │
+                                   rfq-package           │
+                                                         │
+                spec-sheet-retrieval ────────────────────┤  evidence
+                part-number-equivalence ─────────────────┘  which product is which
+```
+
+Every box is a separate skill. They are **atomic on purpose**: pulling one
+datasheet, or settling whether a US and a European part number are the same
+tool, is a complete task on its own and does not need the rest of the pipeline
+dragged along. What makes them a toolkit rather than seven unrelated skills is
+that they share file formats and join on ids that are never reused —
+requirement ids (`REQ-001`) and BOM line ids (`LINE-001`) thread through every
+artefact, so a claim can always be traced back to the document it came from.
+
+Full file contract, join keys and validation gates:
+**[`docs/artefact-chain.md`](docs/artefact-chain.md)**.
+
+### Three rules the toolkit enforces
+
+**Unknown beats plausible.** Every verdict is `pass`, `fail`, `partial` or
+`unknown`, and `unknown` is a complete answer. A disqualifying requirement
+cannot be settled on a retail listing, a review or an inference — the validator
+*errors* on that rather than warning, because a plausible wrong `pass` is
+indistinguishable from a verified one two steps later, and it propagates into a
+shortlist and then into a purchase.
+
+**Nothing is scored.** No weights, no totals, no winner column. A weighted total
+needs weights the user has not given, and once a total exists it is the only
+thing anyone reads — which buries the single `fail` that actually decides the
+purchase. The matrix says what each candidate does and does not do;
+`/procurement-tools:recommend` is where a recommendation gets written.
+
+**Specs are versioned, requirements are retired rather than deleted.** Research
+that never changes the spec has not learned anything, so the spec is expected to
+move — but a conformance record written six weeks ago cites `REQ-004`, and if
+`REQ-004` later means something else, that record silently becomes a false
+statement about a product. Revisions are pinned in every record and stale ones
+are reported as stale.
+
+### The parts that fan out
+
+`spec-sheet-retrieval` and `evaluation-matrix` write **one file per candidate**
+rather than one shared table, which is what lets them run as concurrent
+subagents without collisions. Launch them together in one message; the matrix is
+assembled at read time by `spec_tools.py matrix`.
+
+### Validation
+
+```bash
+python3 scripts/spec_tools.py validate-spec spec.yaml
+python3 scripts/spec_tools.py criteria spec.yaml -o evaluation/criteria.md
+python3 scripts/spec_tools.py validate-conformance evaluation/conformance/*.json --spec spec.yaml
+python3 scripts/spec_tools.py matrix spec.yaml evaluation/conformance -o evaluation/matrix.md
+python3 scripts/spec_tools.py validate-bom bom.yaml --spec spec.yaml
+python3 scripts/spec_tools.py rfq bom.yaml --vendor "Name" --number RFQ-2026-001
+```
+
+The script validates and renders; it never judges whether a product meets a
+requirement, because a script that guessed at that would launder a guess into a
+table. Schemas in [`schema/`](schema), worked examples in [`examples/`](examples).
+
+Tests: `python3 tests/test_spec_tools.py` (offline, synthetic fixtures).
+
+### RFQs stop short of sending
+
+`rfq-package` builds the document and nothing else. The JSON it emits conforms
+exactly to the input schema of
+[`dsrholdings-rfq`](https://github.com/danielrosehill/dsrholdings-rfq-plugin),
+which renders the branded PDF and sends it — that plugin owns supplier
+correspondence, and emailing a supplier gets confirmed each time rather than
+inherited from a previous approval. For an informal request, the JSON plus a
+pasteable plain-text rendering is the deliverable.
 
 ## Price scanning
 

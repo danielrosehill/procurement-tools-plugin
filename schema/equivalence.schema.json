@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/equivalence.schema.json",
+  "title": "procurement-tools part-number equivalence record",
+  "description": "One product family across regions, brands and channels: which part numbers name the same object, which are near-siblings that differ in a way that matters, and which are the traps that look like the right part and are not. Written by the part-number-equivalence skill to data/equivalence/<family>.json.",
+  "type": "object",
+  "required": ["equivalence_version", "family", "anchor", "members", "established"],
+  "additionalProperties": false,
+  "properties": {
+    "equivalence_version": { "type": "integer", "const": 1 },
+    "family": { "type": "string", "description": "Slug for the family, e.g. 'bosch-glm-165'." },
+    "manufacturer": { "type": "string" },
+    "established": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "anchor": {
+      "type": "object",
+      "description": "The part number the search started from — usually the one the user found.",
+      "required": ["part_number"],
+      "additionalProperties": false,
+      "properties": {
+        "part_number": { "type": "string" },
+        "region": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "naming_scheme": {
+      "type": "string",
+      "description": "How this manufacturer builds its part numbers, once decoded — which segment is the range, which is the feature suffix, which is the regional unit system. This is the reusable finding; it usually generalises to the manufacturer's whole catalogue."
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["part_number", "relation", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "part_number": { "type": "string" },
+          "region": { "type": "string", "description": "ISO country/region code, or a market name like 'EU', 'NA', 'MEA'." },
+          "brand": { "type": "string", "description": "Where the same object is sold under another brand — OEM, private label, or a licensed regional brand." },
+          "relation": {
+            "type": "string",
+            "enum": ["identical", "regional-variant", "near-sibling", "successor", "predecessor", "kit-variant", "rebrand", "decoy"],
+            "description": "decoy = a part number that looks like the anchor and is materially different. Recording it is often the most valuable row in the file."
+          },
+          "differences": {
+            "type": "array",
+            "description": "Required for anything that is not 'identical'. What actually differs: units, mains plug, radio certification, bundled accessories, firmware, warranty region.",
+            "items": { "type": "string" }
+          },
+          "spec_impact": { "type": "string", "description": "Whether any difference touches a requirement in the spec, and which one." },
+          "confidence": {
+            "type": "string",
+            "enum": ["confirmed", "probable", "unverified", "refuted"],
+            "description": "confirmed requires a source that states the link — a manufacturer cross-reference, a shared declaration of conformity, matching datasheets under both numbers. Two retailers saying so is 'probable' at best."
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string", "enum": ["manufacturer-cross-reference", "matching-datasheet", "declaration-of-conformity", "regulatory-filing", "distributor-cross-reference", "shared-manual", "shared-accessory-list", "vendor-confirmation", "inference"] },
+                "url": { "type": "string" },
+                "note": { "type": "string" },
+                "retrieved": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+              }
+            }
+          },
+          "availability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sold_in": { "type": "array", "items": { "type": "string" } },
+              "channel": { "type": "string", "description": "retail, trade-only, direct, grey-import." },
+              "note": { "type": "string" }
+            }
+          },
+          "datasheet_ref": { "type": "string" }
+        }
+      }
+    },
+    "buy_implications": {
+      "type": "array",
+      "description": "What the equivalence means for the actual purchase: which number to search in which market, what a cheaper sibling costs you, what will not be honoured under warranty when imported.",
+      "items": { "type": "string" }
+    },
+    "unresolved": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  }
+}

@@ -1,0 +1,213 @@
+# spec-as-code — worked example
+#
+# Drawn from a real purchase (a Bluetooth laser distance measure) because the
+# abstract version of this file teaches nothing. Every field that carries a
+# non-obvious rule is commented.
+#
+#   spec_tools.py validate-spec examples/spec.example.yaml
+#   spec_tools.py criteria examples/spec.example.yaml
+
+spec_version: 1
+id: laser-measure-2026-08
+title: Bluetooth laser distance measure with indirect measurement
+revision: 3
+revised: 2026-08-19
+status: active
+
+scope: >
+  A handheld laser distance measure that transmits each reading to an Android
+  handset, and that can derive a distance it cannot shoot directly — across a
+  corner, or to a point above an obstruction — from measurements it can take.
+
+# Everything a photograph or a favourite listing would otherwise smuggle in as
+# a requirement. Written before candidates are gathered, because afterwards it
+# is too late: by then the incidental attributes of the frontrunner feel like
+# requirements.
+out_of_scope:
+  - Beam colour. Green is easier to see outdoors and is not required.
+  - Point-to-point / floor-plan capture. No maker offers it at this budget.
+  - Camera viewfinder.
+  - Rechargeable vs AAA. Either is acceptable; see REQ-008 for the one caveat.
+  - Case, pouch, or bundled accessories.
+
+context:
+  budget_target: 150
+  budget_ceiling: 180
+  currency: USD
+  destination: storrs
+  quantity: 1
+
+requirements:
+  - id: REQ-001
+    title: Bluetooth to Android
+    kind: must
+    statement: >
+      Transmits each measurement to an Android handset over Bluetooth, without
+      a cable and without the user re-typing the number.
+    parameter: bluetooth
+    operator: exists
+    value: true
+    verify: datasheet
+    evidence: >
+      Manufacturer datasheet or manual naming the radio, plus the maker's own
+      app listed on Google Play. A named radio alone is not enough — some units
+      pair only with an iOS app.
+    rejects: >
+      Retail bullet points. Within one product family the connected and
+      unconnected variants differ by two characters in the part number, and
+      listings routinely carry the wrong one. See the equivalence record.
+    rationale: >
+      The whole reason for replacing a tape measure: readings land in the
+      annotation app rather than in handwriting.
+    added_in: 1
+
+  - id: REQ-002
+    title: Indirect (Pythagorean) measurement
+    kind: must
+    statement: >
+      Computes a distance that cannot be shot directly from two or three
+      measurements that can be, on-device.
+    parameter: indirect_measurement
+    operator: exists
+    value: true
+    verify: manual
+    evidence: >
+      The manual's function list. Manuals name these functions explicitly and
+      show the geometry; product pages often say only "advanced functions".
+    rejects: >
+      An inclinometer on its own. A tilt sensor enables a single-shot indirect
+      height, which is a different and weaker function.
+    rationale: >
+      The measurements that motivated the purchase are all obstructed.
+    added_in: 1
+
+  - id: REQ-003
+    title: Range at least 50 m
+    kind: must
+    statement: Rated maximum range of at least 50 m (165 ft) indoors.
+    parameter: max_range
+    operator: gte
+    value: 50
+    unit: m
+    verify: datasheet
+    evidence: >
+      The datasheet's range figure, with its condition. Ranges are quoted under
+      favourable conditions; record the condition alongside the number.
+    rationale: Longest anticipated run is ~30 m; the margin covers outdoor use.
+    added_in: 1
+
+  - id: REQ-004
+    title: Accuracy at least ±2 mm
+    kind: must
+    statement: Typical accuracy of ±2 mm or better over the working range.
+    parameter: accuracy
+    operator: lte
+    value: 2
+    unit: mm
+    verify: datasheet
+    evidence: >
+      The datasheet's typical-accuracy figure. Note whether it degrades beyond
+      a stated distance; several makers quote one figure to 10 m and a worse
+      one past it.
+    rationale: >
+      Tape-measure parity. Below this the readings stop being trustworthy for
+      joinery, which is most of what gets measured.
+    added_in: 1
+
+  - id: REQ-005
+    title: Documented Bluetooth protocol or a supported integration
+    kind: must
+    statement: >
+      Works with the third-party annotation app already in use, either through
+      a published integration or by selecting the protocol by hand.
+    verify: vendor-confirmation
+    evidence: >
+      The annotation app's own compatibility list, naming the model. Where the
+      list says "manual protocol selection required", that is a pass with a
+      condition, not a fail.
+    rejects: >
+      "Bluetooth" on the box. The handset pairing and the app speaking the
+      instrument's protocol are separate questions.
+    rationale: >
+      A reading that reaches the phone but not the app has solved nothing.
+    added_in: 2
+
+  - id: REQ-006
+    title: Not app-locked to the maker
+    kind: must-not
+    statement: >
+      Readings are not usable only inside the manufacturer's own app, or only
+      behind an account or subscription.
+    verify: manual
+    evidence: >
+      Manual or app store listing showing an account is optional. Subscription
+      tiers are usually disclosed only in the app listing, not the datasheet.
+    rationale: A tool that stops working when a service is retired is not a tool.
+    added_in: 2
+
+  - id: REQ-007
+    title: Discontinued
+    kind: must-not
+    statement: The model is not end-of-life or announced-only at the time of purchase.
+    verify: vendor-confirmation
+    evidence: >
+      Manufacturer's current regional catalogue. Retail availability outlives
+      the catalogue by a long way, so a listing that is in stock proves nothing
+      about whether the model is still made.
+    rationale: >
+      Spares, firmware and app support all follow the catalogue, not the stock.
+    added_in: 3
+
+  - id: REQ-008
+    title: Not lithium-cell powered
+    kind: nice
+    statement: >
+      Runs on replaceable alkaline cells rather than an internal lithium pack.
+    verify: datasheet
+    evidence: Battery type from the datasheet.
+    rationale: >
+      This one is flying home in hand luggage; a built-in lithium pack narrows
+      the options for carrying it. A tie-breaker only — it does not disqualify.
+    added_in: 3
+
+  - id: REQ-009
+    title: IP54 or better
+    kind: nice
+    statement: Ingress protection rating of at least IP54.
+    parameter: ip_rating
+    operator: in
+    value: [IP54, IP65, IP67]
+    verify: datasheet
+    evidence: The datasheet's IP rating.
+    added_in: 1
+
+  - id: REQ-010
+    title: Green beam
+    kind: nice
+    statement: Green laser rather than red.
+    verify: datasheet
+    evidence: Beam colour from the datasheet.
+    retired: true
+    retired_in: 2
+    retired_reason: >
+      Promoted from nice-to-have to out-of-scope. It was excluding the connected
+      variants of two families that otherwise clear everything, and outdoor use
+      turned out to be rare. Retired rather than deleted so that the conformance
+      records written at revision 1 still read correctly.
+
+history:
+  - revision: 1
+    date: 2026-08-19
+    change: Initial set — REQ-001 to REQ-004, REQ-009, REQ-010.
+  - revision: 2
+    date: 2026-08-20
+    change: Added REQ-005 and REQ-006; retired REQ-010.
+    reason: >
+      First sweep showed that Bluetooth presence and app compatibility are
+      independent, and that two candidates gate their data behind an account.
+  - revision: 3
+    date: 2026-08-21
+    change: Added REQ-007 and REQ-008.
+    reason: >
+      One frontrunner turned out to be off the maker's catalogue while still
+      widely in stock, and the unit is being carried home in hand luggage.

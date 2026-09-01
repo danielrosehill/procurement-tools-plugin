@@ -1,0 +1,90 @@
+# Bill of materials — worked example
+#
+# A shopping list written as requirements rather than as products. Lines
+# LINE-001 and LINE-004 are still described-but-unidentified, which is a
+# legitimate state to send to a supplier: it invites them to tell you what they
+# carry instead of confirming a choice you have already made.
+#
+#   spec_tools.py validate-bom examples/bom.example.yaml
+#   spec_tools.py rfq examples/bom.example.yaml --vendor "Acme Tools" --number RFQ-2026-014
+
+bom_version: 1
+id: site-measurement-kit
+title: Site measurement and annotation kit
+revision: 2
+revised: 2026-09-01
+purpose: >
+  Measuring and annotating rooms on site, single operator, results going
+  straight into an annotation app on an Android handset rather than onto paper.
+currency: USD
+destination: storrs
+required_by: 2026-09-20
+
+lines:
+  - id: LINE-001
+    description: >
+      Handheld laser distance measure, minimum 50 m range, typical accuracy
+      ±2 mm or better, with on-device indirect (Pythagorean) measurement and
+      Bluetooth transmission of each reading to an Android handset.
+    quantity: 1
+    unit: ea
+    spec_ref: laser-measure-2026-08#REQ-001,REQ-002,REQ-003,REQ-004
+    substitution: equivalent-only
+    target_price: 155
+    notes: >
+      Bluetooth must reach a third-party annotation app, not only the maker's
+      own — see the spec.
+
+  - id: LINE-002
+    description: >
+      Target plate for laser measurement, minimum 100 x 100 mm, matt white or
+      reflective, rigid.
+    quantity: 2
+    unit: ea
+    substitution: allowed
+    criticality: optional
+    notes: Extends usable outdoor range on light-coloured surfaces.
+
+  - id: LINE-003
+    description: >
+      Bosch GLM165-27C laser distance measure, US part number.
+    quantity: 1
+    unit: ea
+    spec_ref: laser-measure-2026-08
+    substitution: none
+    identified:
+      manufacturer: Bosch
+      part_number: GLM165-27C
+      region: US
+      equivalence_ref: data/equivalence/bosch-glm-165.json
+      conformance_ref: evaluation/conformance/bosch-glm165-27c.json
+    notes: >
+      Alternative to LINE-001 if quoting the identified part is easier than
+      quoting the description. Substitution is closed here precisely because
+      the near-siblings in this family differ by two characters and do not have
+      the radio.
+    criticality: contingent
+
+  - id: LINE-004
+    description: >
+      Tripod with 1/4-20 thread, minimum extended height 1.5 m, with a levelling
+      head or a ball head that locks.
+    quantity: 1
+    unit: ea
+    substitution: allowed
+    target_price: 60
+
+groups:
+  - name: measurement
+    note: One supplier is likely to carry all of these.
+    lines: [LINE-001, LINE-002, LINE-003]
+  - name: support
+    lines: [LINE-004]
+
+history:
+  - revision: 1
+    date: 2026-08-19
+    change: Initial four lines.
+  - revision: 2
+    date: 2026-09-01
+    change: LINE-003 added as an identified alternative to LINE-001, marked contingent.
