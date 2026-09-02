@@ -11,6 +11,7 @@ consumed by others, and joined to the rest by **ids that are never reused**.
 
 | Path | Written by | Schema | Purpose |
 |---|---|---|---|
+| `procurement.json` | `new-workspace`, `workspace-folder`, `scripts/workspace.py` | `schema/workspace.schema.json` | Workspace identity: stable `PW-` id, variant, mode, status, spec revision, report trail. Present in every workspace, repo or folder. |
 | `spec.md` | `/procurement-tools:define-spec`, `:intake` | — | Prose spec: context, rationale, history. For a person. |
 | `search-terms.md` | `/procurement-tools:define-spec` | — | Search vocabulary by register. |
 | `spec.yaml` | `spec-as-code` | `schema/spec.schema.json` | Requirements with stable `REQ-nnn` ids. For a machine. |
@@ -25,6 +26,8 @@ consumed by others, and joined to the rest by **ids that are never reused**.
 | `bom.yaml` | `bom-build` | `schema/bom.schema.json` | Line items with stable `LINE-nnn` ids. |
 | `rfq/RFQ-YYYY-NNN.json` | `rfq-package` | *external — see below* | Supplier request, in the `dsrholdings-rfq` renderer's input shape. |
 | `price-watchlist.yaml`, `data/price-scans/` | `price-scan` | `examples/price-watchlist.example.yaml` | What it costs delivered, today. |
+| `reports/<kind>-YYYY-MM-DD.{md,typ,pdf}` | `procurement-report` | — | The dated deliverable. Never overwritten. Markdown twin always exists; PDF only if Typst is present. |
+| `reports/base.typ` | `procurement-report` | — | Copy of the shared styling, so the workspace recompiles without the plugin. |
 
 Two files are **generated and must not be hand-edited**: `evaluation/criteria.md`
 and `evaluation/matrix.md`. Edit `spec.yaml` or the conformance records and
@@ -34,6 +37,10 @@ validate cleanly and answer the wrong question.
 ## Join keys
 
 ```
+procurement.json     PW-20260902-A1B2C3 ─▶ identifies the workspace itself; survives
+                                          renames, moves and folder→repo promotion.
+                                          The key any later index or database uses.
+
 spec.yaml            REQ-001 ─┬─▶ conformance.cells[].req
                               ├─▶ bom.lines[].spec_ref  ("spec-id@variant#REQ-001,REQ-004")
                               └─▶ datasheet.specs[].req

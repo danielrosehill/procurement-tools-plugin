@@ -104,16 +104,36 @@ candidates: a requirement nothing clears, a requirement everything clears, a
 requirement nobody publishes. Those findings usually change the spec, and a spec
 change here is a success, not a restart.
 
-### 7. Decide, or report that there is nothing to decide
+### 7. Rank — `market-evaluator`
 
-If exactly one candidate clears everything, say so. If several do, the remaining
-differences are price, availability and the `nice` requirements — hand to
-`price-scan` for what they cost delivered, and `/procurement-tools:recommend`
-for the write-up.
+The matrix says who qualifies and deliberately refuses to order them. This is
+where ordering is allowed to happen, and it is a separate skill so that the
+weighting is explicit rather than buried in a total.
 
-If **nothing** clears, that is the deliverable. Report it as the headline, with
-the requirement that did the eliminating and what relaxing it would open up.
-Do not fill the gap with the nearest miss presented as a recommendation.
+Hand to `price-scan` first for what the survivors cost delivered — ranking
+without landed cost ranks on the wrong axis. Then `market-evaluator` reads
+`spec.yaml`, `evaluation/conformance/*.json` and the price data, partitions
+candidates into rankable / blocked / excluded, and writes
+`evaluation/recommendation.md`.
+
+Do **not** route to `/procurement-tools:recommend` from here. That command
+belongs to the `general-purchasing` track and expects `from-ai/research.md`,
+which does not exist in a spec-as-code workspace — the call half-resolves,
+because `define-spec` did produce `spec.md`, and then fails on the missing
+second input in a way that reads like research was never run.
+
+If **nothing** is rankable, that is the deliverable. Report it as the headline,
+with the requirement that did the eliminating and what relaxing it would open
+up. Do not fill the gap with the nearest miss presented as a recommendation.
+
+### 7b. Report — `procurement-report`
+
+Render the deliverable as a dated document: kind `recommendation` when
+`market-evaluator` produced a ranking, kind `conformance` when the finding is
+that nothing qualified. Both are legitimate endings.
+
+Output is `reports/<kind>-YYYY-MM-DD.{md,typ,pdf}`, recorded in
+`procurement.json` so `workspace.py index` can find it later.
 
 ### 8. Procure — `bom-build` → `rfq-package`
 
@@ -144,9 +164,10 @@ point, which is indistinguishable from a verified one two steps later.
 
 ## What this is not
 
-Not a ranking engine. Nothing here scores or weights. The matrix says what each
-candidate does and does not do; the choice is the user's, and
-`/procurement-tools:recommend` is where a recommendation gets written.
+Not a ranking engine in its matrix step. `evaluation-matrix` scores nothing and
+weights nothing — it says what each candidate does and does not do. Ranking is a
+separate, later, explicit step in `market-evaluator`, and the separation is what
+keeps a weighted total from burying the trade-off the matrix exists to expose.
 
 Not a price tool. Prices come from `price-scan`, which egresses from the user's
 own machine through the right country's VPN exit, because a price fetched from

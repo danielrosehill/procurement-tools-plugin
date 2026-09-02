@@ -55,15 +55,30 @@ Someone who has never seen this market and needs to understand it cold: what exi
 
 ## Output
 
-Write `outputs/landscape-YYYY-MM-DD.md`. Unless `--md-only`:
+Write `outputs/landscape-YYYY-MM-DD.md`. Unless `--md-only`, render the PDF through
+the `procurement-report` skill (kind `landscape`) so this report shares styling with
+every other report the plugin produces:
 
-```typst
-#set document(title: "[Category] — Market Landscape", author: "Market Landscape Survey")
-#set page(paper: "a4", margin: 2cm)
-#set text(size: 11pt)
+```bash
+cp "${CLAUDE_PLUGIN_ROOT}/assets/report/base.typ" outputs/base.typ
 ```
 
-Compile to `outputs/landscape-YYYY-MM-DD.pdf`, keeping the `.typ` source alongside. Wide conformance matrices want landscape orientation or a smaller size on that page — check the compiled PDF rather than assuming it fits.
+```typst
+#import "base.typ": *
+#show: report.with(
+  title: "[Category]",
+  kind: "Market landscape",
+  date: "YYYY-MM-DD",
+  meta: (("Spec", "spec.md"), ("Options", "[n]"), ("Swept", "YYYY-MM-DD")),
+)
+```
+
+Compile to `outputs/landscape-YYYY-MM-DD.pdf`, keeping the `.typ` source alongside.
+Wide conformance matrices want landscape orientation or a smaller size on that page —
+check the compiled PDF rather than assuming it fits.
+
+Use `verdict()` and `conformance-table()` for the matrix and `unknown-box[...]` for
+the `?`s, so an unverified cell cannot be mistaken for a finding.
 
 Never overwrite a previous report. Dated files accumulate; `/procurement-tools:mkt-refresh` diffs against them.
 

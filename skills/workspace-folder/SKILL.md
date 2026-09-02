@@ -1,7 +1,7 @@
 ---
 name: workspace-folder
-description: Add a purchase-decision folder inside an existing procurement workspace repository, rather than creating a standalone repo for it. Use when the user already has a general procurement or purchasing repo and wants a new subfolder for one decision, when a purchase is too small to deserve its own repo, when several related purchases should live and be diffed together, or when they say "make a folder for this" rather than "make a repo". The standalone-repo sibling is new-workspace.
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(mkdir *), Bash(cp *), Bash(cat *), Bash(ls *), Bash(git status), Bash(git rev-parse *), Bash(git add *), Bash(git commit *), Bash(date *)
+description: Add a purchase-decision folder inside an existing procurement repo instead of a standalone repo — same scaffold and manifest, never a nested git. The repo sibling is new-workspace.
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(mkdir *), Bash(cp *), Bash(cat *), Bash(ls *), Bash(git status), Bash(git rev-parse *), Bash(git add *), Bash(git commit *), Bash(date *), Bash(python3 *)
 ---
 
 # Purchase folder inside an existing workspace
@@ -109,7 +109,26 @@ In `spec.md` (or `spec.yaml` if going straight to `spec-as-code`), fill in what
 is being bought. Then stop — do not invent requirements. `/procurement-tools:intake`
 or `/procurement-tools:define-spec` is how the spec gets populated.
 
-### 6. Register it with the parent
+### 6. Write the workspace manifest
+
+The folder gets the same `procurement.json` a standalone repo gets, so a
+decision living inside a parent repo is enumerable on exactly the same footing:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../../scripts/workspace.py" init <parent-root>/<subdir>/<folder-name> \
+  --name <folder-name> --variant <variant> --mode folder \
+  --parent-repo <parent-repo-name> --parent-path <subdir>/<folder-name> \
+  --title "<one line: what is being bought>"
+```
+
+`--mode folder` with `--parent-path` is required — without it the manifest is
+rejected, because an index that cannot tell which repo a folder belongs to
+cannot group siblings, and grouping is most of the reason to use a folder.
+
+The id is independent of the parent. If this decision is later promoted to its
+own repo, the id travels with it and the trail from the old location resolves.
+
+### 7. Register it with the parent
 
 A folder that the parent's index does not know about is invisible within a month.
 
@@ -120,7 +139,7 @@ date opened, status `open`. Match the existing format exactly.
 If the parent has no index and now holds three or more decision folders, say so
 and offer to start one. Do not create it unasked.
 
-### 7. Commit to the parent
+### 8. Commit to the parent
 
 ```bash
 git add <path-to-folder>
@@ -130,7 +149,7 @@ git commit -m "Add <folder-name> purchase workspace"
 One commit, in the parent's history, where it belongs. Do not push unless the
 user asks — the parent may have its own release habits.
 
-### 8. Print next steps
+### 9. Print next steps
 
 Name the folder path, and the commands that follow for the variant chosen — for
 `general-purchasing`: `/procurement-tools:intake`, then `/procurement-tools:research`,
@@ -146,3 +165,12 @@ If the decision outgrows the folder:
 2. `git init` in the new location, commit, `gh repo create --source=. --push`.
 3. Leave a line in the parent's index pointing at the new repo, so the trail
    from the old location does not dead-end.
+4. **Keep the id.** `procurement.json` travels with the folder — do not re-init
+   it. Edit `mode` to `repo`, clear `parent`, then confirm it still validates:
+
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/../../scripts/workspace.py" validate <new-repo-root>
+   ```
+
+   Re-initialising would mint a second id for one decision, and any index built
+   before the move would point at a workspace that claims not to exist.

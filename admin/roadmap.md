@@ -2,14 +2,14 @@
 
 Opened 2026-09-02. Status values: `planned`, `in progress`, `done`, `deferred`.
 
-## In progress — workspace identity and the report layer
+## Done in v2.3.0 — workspace identity and the report layer
 
 Two related gaps found in the 2026-09-02 audit of end-to-end coverage. The
 plugin covers spec definition, spec updates, market research, ranking against
 spec and workspace provisioning well. Reporting and workspace identity are the
 weak links.
 
-### Workspace manifest — `in progress`
+### Workspace manifest — `done`
 
 `schema/workspace.schema.json` written 2026-09-02. Defines `procurement.json`,
 written to the root of every workspace whether it is a standalone repo or a
@@ -19,18 +19,17 @@ The id is the point. It is what makes a later index or database possible: one
 scan for `procurement.json` across a tree enumerates every procurement exercise
 ever run, regardless of which skill provisioned it or where it landed.
 
-Remaining:
+Shipped: `scripts/workspace.py` with `init`, `validate`, `set`, `add-report`,
+`purchase` and `index`; manifest writing in both `new-workspace` and
+`workspace-folder`; private as the default visibility for every variant; 28
+checks in `tests/test_workspace.py`.
 
-- `scripts/workspace.py` — `init`, `validate`, `set`, `add-report`, and `index`.
-  `index` is the scan a future database would ingest.
-- `new-workspace` writes the manifest; flip its GitHub default to **private for
-  every variant** (currently public except `market-landscape`). A procurement
-  workspace states what someone plans to buy and what they will pay.
-- `workspace-folder` writes the same manifest with `mode: folder` and a `parent`
-  block, so folder-mode decisions are enumerable on the same footing as repos.
-- Tests in `tests/test_workspace.py`.
+`purchase` was added after a defect found in testing: the schema refuses a
+`purchased` workspace with no `outcome`, and `set --status purchased` had no way
+to supply one, so that status was unreachable. Status, closed date and outcome
+now move together and `set` redirects.
 
-### Unified dated reporting — `planned`
+### Unified dated reporting — `done`
 
 Three tracks end three different ways today, and only one of them does what a
 dated report should:
@@ -49,16 +48,12 @@ revisions into the document so a claim in a PDF traces back to its source.
 Also: extract the Typst preamble, currently duplicated three times, into a
 shared asset so the three report kinds look like one family.
 
-## Planned — defects found 2026-09-02
+## Fixed in v2.3.0 — defects found 2026-09-02
 
-Recorded in full in `debugging.md`. Summary:
-
-- `/recommend` writes an undated path that contradicts the convention its own
-  workspace template documents.
-- `market-evaluator` is not referenced by `technical-sourcing` at all, so the
-  pipeline skill routes past the ranking step added in v2.2.0.
-- `technical-sourcing` step 7 hands to `/recommend`, whose preconditions cannot
-  be satisfied in a spec-as-code workspace.
+All four resolved; diagnosis retained in `debugging.md`. A fifth was found and
+fixed along the way: `assets/report/base.typ` uses a font fallback chain, where
+the old inline Typst hard-coded `Linux Libertine` and would fail outright on a
+machine without it.
 
 ## Deferred
 

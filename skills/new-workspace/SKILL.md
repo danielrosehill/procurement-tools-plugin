@@ -1,8 +1,8 @@
 ---
 name: new-workspace
-description: Provision a new purchasing workspace on disk. Use when the user wants to start a new purchase decision, market landscape survey, tech-rig planning exercise, or vendor-recommendation workspace. Accepts a workspace name and optional variant (general-purchasing | market-landscape | tech-procurement | vendor-recommendations). Scaffolds the workspace, personalises CLAUDE.md from the user's global memory, and (by default) creates a GitHub repo.
+description: Provision a new purchasing workspace as a standalone repo — scaffold, personalised CLAUDE.md, workspace manifest with a stable id, and a private GitHub repo by default.
 disable-model-invocation: true
-allowed-tools: Bash(mkdir *), Bash(cp *), Bash(cat *), Bash(git init *), Bash(git add *), Bash(git commit *), Bash(gh repo create *), Bash(gh auth status), Bash(git push *), Read
+allowed-tools: Bash(mkdir *), Bash(cp *), Bash(cat *), Bash(git init *), Bash(git add *), Bash(git commit *), Bash(gh repo create *), Bash(gh auth status), Bash(git push *), Read, Bash(python3 *)
 ---
 
 # Provision Purchasing Workspace
@@ -25,8 +25,8 @@ If it's ambiguous, ask which — the two workspaces are shaped in opposite direc
 - **First positional**: workspace name (kebab-case, used as directory and GitHub repo name). Required.
 - **Second positional** (optional): target parent path. Defaults to `~/repos/github/logistics-procurement/`, where purchase-research workspaces live by convention (`<Thing>-Purchase-MMDD`). (`~/repos/github/my-repos/` is no longer the default; it holds only blog repos now.)
 - **`--variant=<general-purchasing|market-landscape|tech-procurement|vendor-recommendations>`** (optional): which scaffold to copy. Default: `general-purchasing`.
-- **`--local-only`** (optional): skip GitHub repo creation and push. Default: create a public GitHub repo and push.
-- **`--private`** (optional): create the GitHub repo as private. Default: public — **except `market-landscape`, which defaults to private** (its spec describes what the user is planning). Pass `--public` to override that.
+- **`--local-only`** (optional): skip GitHub repo creation and push. Default: create a GitHub repo and push.
+- **`--public`** (optional): create the GitHub repo as public. **Default for every variant is private.** A procurement workspace states what the user plans to buy, what they will pay, and often where they live — that is true of a general-purchasing spec, a rig plan and a preference profile just as much as of a landscape survey. Public is the exception.
 
 ### Examples
 
@@ -34,7 +34,8 @@ If it's ambiguous, ask which — the two workspaces are shaped in opposite direc
 /procurement-tools:new-workspace new-laptop-2026
 /procurement-tools:new-workspace wearable-mic-landscape --variant=market-landscape
 /procurement-tools:new-workspace workstation-rig --variant=tech-procurement
-/procurement-tools:new-workspace podcast-picks --variant=vendor-recommendations --private
+/procurement-tools:new-workspace podcast-picks --variant=vendor-recommendations
+/procurement-tools:new-workspace open-mic-survey --variant=market-landscape --public
 /procurement-tools:new-workspace scratch-buy --local-only
 ```
 
@@ -61,7 +62,27 @@ cp -r ${CLAUDE_SKILL_DIR}/../../template/<variant>/. <target-parent>/<workspace-
 
 Do **not** copy any `.claude/` tree. The plugin's primitives are global.
 
-### 5. Personalise CLAUDE.md
+### 5. Write the workspace manifest
+
+Every workspace gets `procurement.json` at its root, carrying a stable
+`PW-YYYYMMDD-XXXXXX` id:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../../scripts/workspace.py" init <target-parent>/<workspace-name> \
+  --name <workspace-name> --variant <variant> --mode repo \
+  --visibility <private|public> --title "<one line: what is being bought>"
+```
+
+The id is the point. It never changes once written, so an index can enumerate
+every procurement exercise you have ever run — across machines, after renames,
+after a folder is promoted to a repo — with one scan for `procurement.json`.
+Directory naming conventions cannot do that: names get changed, and a name
+carries no status, no spec revision and no report trail.
+
+Do not hand-write this file or invent an id. Do not reuse an id from another
+workspace.
+
+### 6. Personalise CLAUDE.md
 
 Open the new workspace's `CLAUDE.md` and:
 
@@ -69,7 +90,7 @@ Open the new workspace's `CLAUDE.md` and:
 - Add a short header noting the workspace name and variant.
 - If ambient facts include OS / locale / currency, embed them so downstream commands can skip re-asking.
 
-### 6. Prompt for workspace-specific facts
+### 7. Prompt for workspace-specific facts
 
 Ask the user only for facts this plugin can't infer:
 
@@ -78,7 +99,7 @@ Ask the user only for facts this plugin can't infer:
 - **tech-procurement**: the target machine label (e.g. `workstation`, `gaming-pc`). Remind them to run `/procurement-tools:rig-setup` then `/procurement-tools:rig-profile` to build hardware context.
 - **vendor-recommendations**: the format(s) they want recommendations for (films, podcasts, books, etc.). Remind them to run `/procurement-tools:rec-onboard` to capture preferences.
 
-### 7. Initialise git and (optionally) publish
+### 8. Initialise git and (optionally) publish
 
 ```bash
 cd <target-parent>/<workspace-name>
@@ -93,14 +114,15 @@ Unless `--local-only` is set:
 gh repo create <workspace-name> --<public|private> --source=. --push
 ```
 
-Use `--public` by default, `--private` if the flag was passed. For `--variant=market-landscape` invert that default: private unless `--public` is passed explicitly.
+Private unless `--public` was passed explicitly. Do not vary this by variant.
 
-### 8. Print next steps
+### 9. Print next steps
 
 Tell the user:
 
 - Workspace path.
-- Variant chosen.
+- **Workspace id** from `procurement.json` — the handle for this decision.
+- Variant chosen, and that the repo is private unless `--public` was passed.
 - Which plugin commands apply:
   - **general-purchasing** → `/procurement-tools:intake`, `/procurement-tools:research`, `/procurement-tools:compare`, `/procurement-tools:recommend`, `/procurement-tools:market-check`, `/procurement-tools:load-preferences`, `/procurement-tools:save-preferences`.
   - **market-landscape** → `/procurement-tools:mkt-spec`, `/procurement-tools:mkt-survey`, `/procurement-tools:mkt-segment`, `/procurement-tools:mkt-matrix`, `/procurement-tools:mkt-gaps`, `/procurement-tools:mkt-report`, `/procurement-tools:mkt-refresh`. Note that `/procurement-tools:intake`, `/procurement-tools:research` and `/procurement-tools:recommend` are deliberately *not* part of this flow — they drive toward a pick.

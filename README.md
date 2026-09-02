@@ -40,6 +40,7 @@ document, so a claim can always be traced back to where it came from.
 | `spec-variants` | Parallel either/or bars — a budget spec and a premium spec for one purchase, versioned independently |
 | `evaluation-matrix` | Candidate-by-requirement conformance, with unknowns recorded as unknown rather than guessed |
 | `market-evaluator` | The ranked call after conformance: top three with price and sourcing, then best budget / overall / features |
+| `procurement-report` | The dated deliverable — markdown plus PDF, never overwriting a predecessor, recorded in the workspace manifest |
 | `technical-sourcing` | Sourcing where specifications decide the purchase and price is a constraint |
 | `bom-build` | A multi-item list with quantities, alternates and rationale |
 | `rfq-package` | That list turned into something a supplier can quote against |
@@ -170,8 +171,37 @@ All model-invocable, so a subagent can reach for them mid-task.
 **Everything else:**
 
 - **`price-scan`** — model-invocable. Scans a shortlist of product URLs for current price, stock, shipping and landed cost across your configured marketplaces, from your own machine with the VPN exit set to the country each shop requires. Runs inside any purchase-research repo and writes results there. See [Price scanning](#price-scanning).
-- **`workspace-folder`** — adds a purchase folder inside a procurement repo you already have, instead of a standalone repo. No `git init`, commits to the parent, registers itself in the parent's index. The sibling of `new-workspace`.
-- **`/procurement-tools:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--private]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, and (by default) creates a public GitHub repo for it. `market-landscape` defaults to private.
+- **`workspace-folder`** — adds a purchase folder inside a procurement repo you already have, instead of a standalone repo. No `git init`, commits to the parent, registers itself in the parent's index, and writes the same `procurement.json` manifest a standalone repo gets. The sibling of `new-workspace`.
+- **`procurement-report`** — the report step for every track. Reads whichever spec, conformance, research and pricing artefacts the workspace holds and writes `reports/<kind>-YYYY-MM-DD.{md,typ,pdf}`. Dated and never overwriting: a report is a claim about a market at a moment, and overwriting destroys the record of what you believed when you decided.
+- **`/procurement-tools:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--public]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, writes a `procurement.json` manifest with a stable id, and creates a **private** GitHub repo. Private is the default for every variant; a procurement workspace says what you plan to buy and what you will pay. Pass `--public` to override.
+
+## Workspace identity
+
+Every workspace — a standalone repo from `new-workspace`, or a folder inside a
+parent repo from `workspace-folder` — carries `procurement.json` at its root with
+a stable id:
+
+```
+PW-20260902-A1B2C3
+```
+
+The id is written once and never changes. Rename the directory, move it between
+machines, promote a folder to its own repo: the id survives all of it. That is
+what makes one scan enumerate every procurement exercise you have ever run.
+
+```bash
+S="${CLAUDE_PLUGIN_ROOT}/scripts/workspace.py"
+
+python3 "$S" init . --variant general-purchasing --title "Laser measure"
+python3 "$S" add-report . --kind recommendation --path reports/recommendation-2026-09-02.md
+python3 "$S" purchase . --product "Bosch GLM 165-27 C" --price 449 --currency ILS
+python3 "$S" index ~/repos/github/logistics-procurement --format md
+```
+
+`index` is the seam for a later database — it emits JSON over a whole tree, and
+because it scans the manifests directly it cannot go stale relative to them.
+Status moves `open → decided → purchased | abandoned | superseded`, and the
+schema refuses a `purchased` workspace that records nothing as bought.
 
 ## Technical sourcing
 
