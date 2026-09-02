@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/bom.schema.json",
+  "$id": "https://github.com/danielrosehill/procurement-tools-plugin/schema/bom.schema.json",
   "title": "procurement-tools bill of materials",
   "description": "A shopping list expressed as requirements rather than products. Written as YAML (bom.yaml). Lines start described-but-unidentified and acquire a part number as research settles them; a line is quotable at either stage, which is what lets an RFQ go out before the choice is made.",
   "type": "object",

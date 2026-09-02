@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/datasheet.schema.json",
+  "$id": "https://github.com/danielrosehill/procurement-tools-plugin/schema/datasheet.schema.json",
   "title": "procurement-tools datasheet record",
   "description": "What the manufacturer's own documentation says about one part number, with the document it came from. Written by the spec-sheet-retrieval skill to data/datasheets/<manufacturer>-<part-number>.json. The point of the record is provenance: a spec value with no document behind it is an unknown, not a value.",
   "type": "object",

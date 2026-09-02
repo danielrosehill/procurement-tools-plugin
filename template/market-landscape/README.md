@@ -7,7 +7,7 @@
 
 A Claude Code workspace for **surveying a market against a spec**. You have a requirement; you want to know what exists that meets it, how the market divides, and where the gaps are. The deliverable is a map, not a purchase.
 
-Provisioned by the [purchasing plugin](https://github.com/danielrosehill/Claude-Purchasing-Plugin):
+Provisioned by the [procurement-tools plugin](https://github.com/danielrosehill/procurement-tools-plugin):
 
 ```
 /procurement-tools:new-workspace <name> --variant=market-landscape --private

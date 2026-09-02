@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/conformance.schema.json",
+  "$id": "https://github.com/danielrosehill/procurement-tools-plugin/schema/conformance.schema.json",
   "title": "procurement-tools conformance record",
   "description": "One candidate judged against one revision of one spec. Written by the evaluation-matrix skill, one file per candidate under evaluation/conformance/. Deliberately per-candidate rather than one big table so that independent subagents can each write one without colliding.",
   "type": "object",

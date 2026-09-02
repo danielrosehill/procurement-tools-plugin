@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/equivalence.schema.json",
+  "$id": "https://github.com/danielrosehill/procurement-tools-plugin/schema/equivalence.schema.json",
   "title": "procurement-tools part-number equivalence record",
   "description": "One product family across regions, brands and channels: which part numbers name the same object, which are near-siblings that differ in a way that matters, and which are the traps that look like the right part and are not. Written by the part-number-equivalence skill to data/equivalence/<family>.json.",
   "type": "object",

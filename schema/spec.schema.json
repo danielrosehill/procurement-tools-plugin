@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/danielrosehill/Claude-Purchasing-Plugin/schema/spec.schema.json",
+  "$id": "https://github.com/danielrosehill/procurement-tools-plugin/schema/spec.schema.json",
   "title": "procurement-tools spec-as-code",
   "description": "Machine-readable requirement set for one purchase or one market survey. Written as YAML (spec.yaml), validated and rendered by scripts/spec_tools.py. Requirement IDs are stable across revisions and are the join key used by conformance records, BOM lines and RFQ line items.",
   "type": "object",
