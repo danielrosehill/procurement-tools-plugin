@@ -1,35 +1,78 @@
 # procurement-tools
 
-Claude Code plugin for running purchasing decisions end-to-end — from intake and spec, through research and comparison, to a recommendation and (optionally) a PDF report. Covers four purchasing surfaces: general consumer/business purchasing, spec-driven market landscape surveys, technical rig procurement, and vendor/content recommendations.
+**Product research and procurement skills for Claude Code, with a particular focus on
+technical specification conformance.**
+
+The question this plugin is built around is not "where is it cheapest" but *does this
+part actually meet the requirement*, and can you show your working. It takes a
+purchase from a vague want — or a photograph — to a vendor-neutral spec, retrieves
+manufacturer datasheets, resolves part numbers across regions, scores candidates
+against the spec in a conformance matrix, and ends in a recommendation, a bill of
+materials, or an RFQ package.
+
+It is deliberately **marketplace-agnostic**. It never assumes a particular shop; the
+marketplace-specific plugins listed below do that.
 
 Part of the [danielrosehill Claude Code marketplace](https://github.com/danielrosehill/Claude-Code-Plugins).
 
+```
+/plugin marketplace add danielrosehill/Claude-Code-Plugins
+/plugin install procurement-tools@danielrosehill
+```
+
+## Spec conformance is the through-line
+
+Most buying advice optimises price against reviews. That works for commodities and
+fails wherever a datasheet decides the outcome — where the wrong flange, voltage,
+ingress rating or regional part suffix means the thing arrives and does not fit, does
+not comply, or does not work.
+
+So the spine of the plugin is a chain in which the **specification is the artefact** —
+versioned, machine-checkable, and the thing every later step is judged against.
+Requirement ids (`REQ-001`) and BOM line ids (`LINE-001`) thread through every
+document, so a claim can always be traced back to where it came from.
+
+| Skill | What it settles |
+| --- | --- |
+| `spec-as-code` | The requirement as a versioned, machine-checkable artefact rather than prose that drifts |
+| `spec-sheet-retrieval` | The manufacturer's own datasheet, not a retailer's retyped summary of it |
+| `part-number-equivalence` | Whether a part number sold in one region is the same thing as the one you specced |
+| `evaluation-matrix` | Candidate-by-requirement conformance, with unknowns recorded as unknown rather than guessed |
+| `technical-sourcing` | Sourcing where specifications decide the purchase and price is a constraint |
+| `bom-build` | A multi-item list with quantities, alternates and rationale |
+| `rfq-package` | That list turned into something a supplier can quote against |
+
+Each is atomic and usable on its own — see [**Technical sourcing**](#technical-sourcing)
+below for how they join, and [`docs/artefact-chain.md`](docs/artefact-chain.md) for the
+file contract.
+
 ## Which plugin do I want?
 
-This plugin is the **general, marketplace-agnostic** half of the buying stack. It is
-about the *process*: working out what the thing is, what it has to do, which
-candidates qualify, and which one to buy. It never assumes a particular shop.
+This plugin is the **process** half of the buying stack: working out what the thing
+is, what it has to do, which candidates qualify, and which one to buy. The plugins
+below are the **place** half — how a given retailer's catalogue, language, currency,
+tax treatment and stock data actually work.
 
-The **`shopping`** plugin and its regional and per-marketplace siblings are the other
-half. They are about *specific places*: how a given retailer's catalogue, language,
-currency, tax treatment and stock data actually work.
+| You are doing this | Use | Repo |
+| --- | --- | --- |
+| I don't know what this thing is called, or what to search for | **`procurement-tools`** → `define-spec` | this repo |
+| Turning a want into a spec, then judging candidates against it | **`procurement-tools`** | this repo |
+| Specifications decide the purchase, not price or reviews | **`procurement-tools`** → `technical-sourcing` | this repo |
+| Chasing a manufacturer datasheet, or a part number across regions | **`procurement-tools`** → `spec-sheet-retrieval`, `part-number-equivalence` | this repo |
+| A multi-item list going to suppliers for quotes | **`procurement-tools`** → `bom-build`, `rfq-package` | this repo |
+| Surveying a whole product category before choosing | **`procurement-tools`** → `mkt-*` | this repo |
+| Planning a hardware build or rig | **`procurement-tools`** → `rig-*` | this repo |
+| Finding who stocks it locally, at what price, in stock when | **`shopping`** | [`Claude-Shopping-Plugin`](https://github.com/danielrosehill/Claude-Shopping-Plugin) |
+| Israeli retailers, Hebrew terms, Zap, ILS, parallel imports | **`israel-shopping`** | [`Claude-Israel-Shopping-Plugin`](https://github.com/danielrosehill/Claude-Israel-Shopping-Plugin) |
+| Amazon listings, Prime-aware delivery dates, seller identity | **`amazon`** | [`Claude-Amazon-Plugin`](https://github.com/danielrosehill/Claude-Amazon-Plugin) |
+| AliExpress in Israel — Choice, VAT and customs thresholds | **`aliexpress-israel-skills`** | [`Aliexpress-Israel-Skills`](https://github.com/danielrosehill/Aliexpress-Israel-Skills) |
+| Assembling a full hardware build specification | **`hardware-spec-assembly`** | [`Claude-Hardware-Spec-Assembly-Plugin`](https://github.com/danielrosehill/Claude-Hardware-Spec-Assembly-Plugin) |
+| Certifying something against a published standard | **`spec-led-certification`** | [`spec-led-certification-plugin`](https://github.com/danielrosehill/spec-led-certification-plugin) |
 
-| You are doing this | Use |
-| --- | --- |
-| I don't know what this thing is called, or what to search for | **`procurement-tools`** → `define-spec` |
-| Turning a want into a spec, then judging candidates against it | **`procurement-tools`** |
-| Specifications decide the purchase, not price or reviews | **`procurement-tools`** → `technical-sourcing` |
-| Chasing a manufacturer datasheet, or a part number across regions | **`procurement-tools`** → `spec-sheet-retrieval`, `part-number-equivalence` |
-| A multi-item list going to suppliers for quotes | **`procurement-tools`** → `bom-build`, `rfq-package` |
-| Surveying a whole product category before choosing | **`procurement-tools`** → `mkt-*` |
-| Planning a hardware build or rig | **`procurement-tools`** → `rig-*` |
-| Finding who stocks it locally, at what price, in stock when | **`shopping`** |
-| Israeli retailers, Hebrew terms, Zap, ILS, parallel imports | **`israel-shopping`** |
-| One named marketplace's search syntax and quirks | that marketplace's own plugin (`amazon-us`, `aliexpress-israel-skills`, `grainger`, …) |
-
-The two halves are designed to be installed together. Once a question narrows from
-"what should I buy" to "how does *this shop* work", the `marketplace-handoff` skill
-routes it out of here.
+The halves are designed to be installed together. Once a question narrows from "what
+should I buy" to "how does *this shop* work", the `marketplace-handoff` skill routes it
+out of here. The maintained roster of marketplace plugins lives in `shopping`'s
+`marketplace-plugins` skill — kept in one place so it cannot go stale in two.
 
 ## Spec definition
 
