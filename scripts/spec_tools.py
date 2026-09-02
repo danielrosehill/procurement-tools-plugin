@@ -122,6 +122,32 @@ def requirements(spec: dict, include_retired: bool = False) -> list[dict]:
     return [r for r in reqs if not r.get("retired")]
 
 
+def spec_ident(spec: dict) -> str:
+    """Human identity of a spec: 'laser-measure@budget r3', or 'laser-measure r3'.
+
+    Identity is the triple id + variant + revision. id names the purchase and is
+    shared by every variant of it; variant names a parallel either/or branch;
+    revision moves linearly *within* one variant. An absent variant is the common
+    case — one spec, iterative revisions — and prints without the @ part.
+    """
+    base = str(spec.get("id") or "?")
+    variant = spec.get("variant")
+    if variant:
+        base = f"{base}@{variant}"
+    return f"{base} r{spec.get('revision', '?')}"
+
+
+def parse_spec_ref(ref: str) -> tuple[str, str | None, list[str]]:
+    """Split 'id@variant#REQ-001,REQ-004' into (id, variant|None, [req ids]).
+
+    Every part after the id is optional, so a bare id still parses.
+    """
+    head, _, req_list = str(ref).partition("#")
+    spec_id, at, variant = head.partition("@")
+    reqs = [x.strip() for x in req_list.split(",") if x.strip()]
+    return spec_id.strip(), (variant.strip() if at else None), reqs
+
+
 def req_title(req: dict) -> str:
     title = req.get("title")
     if title:
@@ -150,6 +176,25 @@ def validate_spec(spec: Any, p: Problems) -> None:
         p.error("revision must be an integer")
     if spec.get("revised") and not ISO_DATE.match(str(spec["revised"])):
         p.error(f"revised {spec['revised']!r} is not YYYY-MM-DD")
+
+    variant = spec.get("variant")
+    if variant is not None:
+        if not isinstance(variant, str) or not SLUG.match(variant):
+            p.error(f"variant {variant!r} is not a lowercase slug")
+        elif not spec.get("variant_rationale"):
+            p.warn(f"variant {variant!r} has no variant_rationale — nothing says what trade-off "
+                   "it takes, which is the only thing a reader compares variants on")
+        of = spec.get("variant_of")
+        if of is not None:
+            if not isinstance(of, str) or not SLUG.match(of):
+                p.error(f"variant_of {of!r} is not a lowercase slug")
+            elif of == variant:
+                p.error(f"variant_of {of!r} is the variant itself — variants are siblings, not a chain")
+    else:
+        for field in ("variant_label", "variant_rationale", "variant_of"):
+            if spec.get(field):
+                p.error(f"{field} is set but variant is not — a variant field with no variant is "
+                        "ambiguous about whether this spec is a branch")
     if not spec.get("scope"):
         p.warn("no scope — subagents get the requirement list with no idea what it is for")
     if not spec.get("out_of_scope"):
@@ -204,10 +249,16 @@ def validate_spec(spec: Any, p: Problems) -> None:
 
         if req.get("retired") and not req.get("retired_in"):
             p.warn(f"{where} is retired but does not say in which revision")
+        if req.get("variant_note") and not spec.get("variant"):
+            p.warn(f"{where} has a variant_note but the spec has no variant — it will read as "
+                   "an explanation of a difference from nothing")
 
     # Numbering discipline: gaps are fine (retirements), but an id above the
     # count of requirements with nothing retired usually means a hand edit.
-    if highest > len(reqs) and not any(r.get("retired") for r in reqs if isinstance(r, dict)):
+    # A variant legitimately omits ids that its siblings carry, so the gap says
+    # nothing about hand-editing there. Only meaningful on an unvaried spec.
+    if (highest > len(reqs) and not spec.get("variant")
+            and not any(r.get("retired") for r in reqs if isinstance(r, dict))):
         p.warn(f"highest id is REQ-{highest:03d} but there are {len(reqs)} requirements and none are retired")
 
     history = spec.get("history") or []
@@ -216,6 +267,191 @@ def validate_spec(spec: Any, p: Problems) -> None:
     revs = [h.get("revision") for h in history if isinstance(h, dict)]
     if revs and isinstance(spec.get("revision"), int) and max(revs) != spec["revision"]:
         p.error(f"history top revision {max(revs)} does not match revision {spec['revision']}")
+
+
+# ---------------------------------------------------------------------------
+# variants — parallel either/or branches of one spec, each versioned separately
+# ---------------------------------------------------------------------------
+
+def _req_shape(req: dict) -> tuple:
+    """The part of a requirement that decides what would pass.
+
+    Prose (statement, rationale, evidence) is deliberately excluded: variants are
+    expected to word things slightly differently, and flagging that as a
+    divergence would bury the differences that actually change the verdict.
+    """
+    return (req.get("kind"), req.get("parameter"), req.get("operator"),
+            _hashable(req.get("value")), req.get("unit"), req.get("verify"))
+
+
+def _hashable(v: Any) -> Any:
+    if isinstance(v, list):
+        return tuple(_hashable(x) for x in v)
+    if isinstance(v, dict):
+        return tuple(sorted((k, _hashable(x)) for k, x in v.items()))
+    return v
+
+
+def validate_family(specs: list[tuple[str, dict]], p: Problems) -> None:
+    """Check a set of sibling variant specs against each other.
+
+    Each variant is validated on its own elsewhere. What can only be checked
+    across the family is that they are variants of the SAME purchase and that
+    requirement ids still mean the same thing in each — which is the property
+    the whole design rests on, because it is what lets one candidate be judged
+    against several variants and the results be diffed.
+    """
+    if len(specs) < 2:
+        return
+
+    ids = {spec.get("id") for _, spec in specs}
+    if len(ids) > 1:
+        p.error("these are not variants of one purchase — spec ids differ: "
+                + ", ".join(sorted(str(i) for i in ids)))
+
+    variants: dict[str, str] = {}
+    for name, spec in specs:
+        v = spec.get("variant")
+        if not v:
+            p.error(f"{name} has no variant, but sits alongside {len(specs) - 1} spec(s) that do — "
+                    "once a spec is branched, every file must name its variant, or it is ambiguous "
+                    "which one is in force")
+            continue
+        if v in variants:
+            p.error(f"variant {v!r} is defined twice ({variants[v]} and {name})")
+        variants[v] = name
+
+    for name, spec in specs:
+        of = spec.get("variant_of")
+        if of and of not in variants:
+            p.warn(f"{name} says variant_of {of!r}, which is not among the variants present "
+                   f"({', '.join(sorted(variants)) or 'none'})")
+
+    # Requirement ids must name the same subject in every variant. Differing
+    # thresholds are the point; differing SUBJECTS silently corrupt every
+    # cross-variant comparison, so that is an error rather than a warning.
+    subjects: dict[str, list[tuple[str, str | None, str]]] = {}
+    for name, spec in specs:
+        for req in requirements(spec, include_retired=True):
+            rid = req.get("id")
+            if isinstance(rid, str):
+                subjects.setdefault(rid, []).append(
+                    (spec.get("variant") or name, req.get("parameter"), req_title(req)))
+
+    for rid, uses in sorted(subjects.items()):
+        params = {param for _, param, _ in uses if param}
+        if len(params) > 1:
+            detail = "; ".join(f"{v}: {param}" for v, param, _ in uses if param)
+            p.error(f"{rid} names a different parameter in different variants ({detail}) — "
+                    "requirement ids must mean the same subject in every variant, or the diff "
+                    "and any cross-variant conformance record are meaningless. Allocate a new id.")
+        elif not params:
+            titles = {t.lower() for _, _, t in uses}
+            if len(titles) > 1:
+                p.warn(f"{rid} has no parameter and reads differently across variants — check it is "
+                       "still the same requirement, not two reusing one id")
+
+
+def render_variant_diff(specs: list[tuple[str, dict]]) -> str:
+    """Render what actually differs between sibling variants, requirement by requirement."""
+    specs = sorted(specs, key=lambda pair: pair[1].get("variant") or "")
+    labels = [(spec.get("variant") or "—", spec.get("variant_label") or spec.get("variant") or "—")
+              for _, spec in specs]
+    spec_id = next((spec.get("id") for _, spec in specs if spec.get("id")), "?")
+
+    out: list[str] = [f"# Variant diff — {spec_id}", ""]
+    out.append("Requirement ids mean the same subject in every variant; only what would *pass* differs.")
+    out.append("")
+    out.append("| Variant | Revision | Trade-off |")
+    out.append("| --- | --- | --- |")
+    for _, spec in specs:
+        out.append(f"| **{spec.get('variant_label') or spec.get('variant') or '—'}** "
+                   f"| r{spec.get('revision', '?')} "
+                   f"| {(spec.get('variant_rationale') or '—').replace('|', '\\|')} |")
+    out.append("")
+
+    by_req: dict[str, dict[str, dict]] = {}
+    for _, spec in specs:
+        v = spec.get("variant") or "—"
+        for req in requirements(spec):
+            rid = req.get("id")
+            if isinstance(rid, str):
+                by_req.setdefault(rid, {})[v] = req
+
+    shared, differing, exclusive = [], [], []
+    all_variants = [v for v, _ in labels]
+    for rid, per in sorted(by_req.items()):
+        if len(per) < len(specs):
+            exclusive.append(rid)
+        elif len({_req_shape(r) for r in per.values()}) > 1:
+            differing.append(rid)
+        else:
+            shared.append(rid)
+
+    out.append(f"**{len(shared)} requirement(s) identical across all variants**, "
+               f"**{len(differing)} differ**, **{len(exclusive)} appear in some variants only**.")
+    out.append("")
+
+    if differing:
+        out.append("## Same requirement, different bar")
+        out.append("")
+        out.append("| Req | " + " | ".join(f"**{lbl}**" for _, lbl in labels) + " |")
+        out.append("| --- | " + " | ".join("---" for _ in labels) + " |")
+        for rid in differing:
+            cells = []
+            for v, _ in labels:
+                req = by_req[rid].get(v)
+                cells.append(_bar(req) if req else "—")
+            out.append(f"| `{rid}` {req_title(by_req[rid][all_variants[0]])} | " + " | ".join(cells) + " |")
+        out.append("")
+        notes = [(rid, v, by_req[rid][v].get("variant_note"))
+                 for rid in differing for v, _ in labels
+                 if by_req[rid].get(v) and by_req[rid][v].get("variant_note")]
+        if notes:
+            out.append("Why they differ:")
+            out.append("")
+            for rid, v, note in notes:
+                out.append(f"- `{rid}` / **{v}** — {note}")
+            out.append("")
+
+    if exclusive:
+        out.append("## Present in some variants only")
+        out.append("")
+        out.append("| Req | " + " | ".join(f"**{lbl}**" for _, lbl in labels) + " |")
+        out.append("| --- | " + " | ".join("---" for _ in labels) + " |")
+        for rid in exclusive:
+            any_req = next(iter(by_req[rid].values()))
+            cells = [(_bar(by_req[rid][v]) if by_req[rid].get(v) else "not required")
+                     for v, _ in labels]
+            out.append(f"| `{rid}` {req_title(any_req)} | " + " | ".join(cells) + " |")
+        out.append("")
+
+    if not differing and not exclusive:
+        out.append("These variants are identical. Either they have converged and one should be "
+                   "retired, or a change has not been made yet.")
+        out.append("")
+
+    out.append("---")
+    out.append("")
+    out.append("A candidate must be judged against each variant separately: the same evidence can "
+               "clear one bar and fail another, so one conformance record per variant.")
+    out.append("")
+    return "\n".join(out)
+
+
+def _bar(req: dict) -> str:
+    """One cell: what this variant demands, compactly."""
+    kind = req.get("kind")
+    prefix = {"must": "", "must-not": "must NOT ", "nice": "nice: "}.get(kind, "")
+    op, val, unit = req.get("operator"), req.get("value"), req.get("unit")
+    if op and val is not None:
+        sym = {"gte": "≥", "lte": "≤", "eq": "=", "ne": "≠"}.get(op, op)
+        if isinstance(val, list):
+            val = "–".join(str(x) for x in val) if op == "range" else ", ".join(str(x) for x in val)
+        return f"{prefix}{sym} {val}{(' ' + unit) if unit else ''}"
+    if op in ("exists", "absent"):
+        return f"{prefix}{op}"
+    return prefix + (req.get("parameter") or "required")
 
 
 # ---------------------------------------------------------------------------
@@ -364,9 +600,18 @@ def validate_conformance(rec: Any, spec: dict | None, p: Problems) -> None:
     if spec is not None:
         if ref.get("id") != spec.get("id"):
             p.error(f"spec.id {ref.get('id')!r} does not match the spec being validated ({spec.get('id')!r})")
+        elif ref.get("variant") != spec.get("variant"):
+            # Not a staleness warning: a verdict reached against the budget bar
+            # says nothing about the premium one, so this record does not belong
+            # in this matrix at all.
+            p.error(f"evaluated against variant {ref.get('variant')!r}, but this spec is "
+                    f"{spec.get('variant')!r} — the same evidence can pass one variant and fail "
+                    "another, so this record belongs in a different matrix")
         elif ref.get("revision") != spec.get("revision"):
-            p.warn(f"evaluated against spec revision {ref.get('revision')}, current is "
-                   f"{spec.get('revision')} — stale, re-check the cells the revision touched")
+            p.warn(f"evaluated against {spec_ident({**spec, 'revision': ref.get('revision')})}, current is "
+                   f"r{spec.get('revision')} — stale, re-check the cells the revision touched")
+    elif ref.get("variant") is not None and not SLUG.match(str(ref.get("variant"))):
+        p.error(f"spec.variant {ref.get('variant')!r} is not a lowercase slug")
 
     cells = rec.get("cells")
     if not isinstance(cells, list):
@@ -450,12 +695,23 @@ def render_matrix(spec: dict, records: list[tuple[pathlib.Path, dict]]) -> str:
 
     out: list[str] = []
     w = out.append
-    w(f"# Conformance matrix — {spec.get('title', spec.get('id'))}")
+    variant = spec.get("variant")
+    heading = spec.get("title", spec.get("id"))
+    if variant:
+        heading += f" — {spec.get('variant_label') or variant} variant"
+    w(f"# Conformance matrix — {heading}")
     w("")
-    w(f"*Generated by `spec_tools.py matrix` from `spec.yaml` revision {spec.get('revision')} "
+    source = f"spec-{variant}.yaml" if variant else "spec.yaml"
+    w(f"*Generated by `spec_tools.py matrix` from `{source}` ({spec_ident(spec)}) "
       f"and {len(records)} conformance record(s) on {dt.date.today().isoformat()}. "
       f"Do not edit by hand.*")
     w("")
+    if variant:
+        w(f"**This matrix judges candidates against the `{variant}` variant only.** "
+          + (f"Trade-off: {spec['variant_rationale']} " if spec.get("variant_rationale") else "")
+          + "A candidate cleared here is not thereby cleared under a sibling variant — "
+            "each variant gets its own matrix.")
+        w("")
     w("`yes` / `no` / `part` / `?` — never a score. `?` means not established to the standard "
       "the requirement asks for, and is left as `?`.")
     w("")
@@ -606,12 +862,18 @@ def validate_bom(bom: Any, spec: dict | None, p: Problems) -> None:
         ref = line.get("spec_ref")
         if sub == "equivalent-only" and not ref:
             p.warn(f"{lid} is 'equivalent-only' with no spec_ref — nothing defines what equivalent means")
+        if ref and spec and spec.get("variant") and "@" not in str(ref):
+            p.warn(f"{lid} spec_ref {ref!r} names no variant, but the spec has variants — "
+                   "which variant's requirements justify this line is then undefined")
         if ref and known_reqs:
-            spec_id, _, req_list = str(ref).partition("#")
+            spec_id, ref_variant, ref_reqs = parse_spec_ref(ref)
             if spec.get("id") and spec_id and spec_id != spec["id"]:
                 p.warn(f"{lid} spec_ref points at {spec_id!r}, not the spec given ({spec['id']!r}) — not checked")
-            elif req_list:
-                for rid in [x.strip() for x in req_list.split(",") if x.strip()]:
+            elif ref_variant != spec.get("variant"):
+                p.warn(f"{lid} spec_ref names variant {ref_variant!r}, but the spec given is "
+                       f"{spec.get('variant')!r} — not checked against these requirements")
+            elif ref_reqs:
+                for rid in ref_reqs:
                     if not REQ_ID.match(rid):
                         p.error(f"{lid} spec_ref names {rid!r}, which is not a REQ-nnn id")
                     elif rid not in known_reqs:
@@ -764,6 +1026,14 @@ def main() -> int:
     s.add_argument("conformance_dir")
     s.add_argument("-o", "--out")
 
+    s = sub.add_parser("validate-variants",
+                       help="check sibling variant specs against each other (shared id, consistent REQ subjects)")
+    s.add_argument("specs", nargs="+", help="spec-<variant>.yaml files, or a directory containing them")
+
+    s = sub.add_parser("variant-diff", help="render what differs between sibling variant specs")
+    s.add_argument("specs", nargs="+", help="spec-<variant>.yaml files, or a directory containing them")
+    s.add_argument("-o", "--out")
+
     s = sub.add_parser("validate-bom", help="check bom.yaml, and its spec references if given a spec")
     s.add_argument("bom")
     s.add_argument("--spec")
@@ -817,6 +1087,36 @@ def main() -> int:
             return 2
         _write(render_matrix(spec, records), args.out)
         return 0
+
+    if args.cmd in ("validate-variants", "variant-diff"):
+        paths: list[pathlib.Path] = []
+        for raw in args.specs:
+            path = pathlib.Path(raw)
+            if path.is_dir():
+                paths.extend(sorted(path.glob("spec-*.y*ml")))
+            else:
+                paths.append(path)
+        if not paths:
+            print("no spec-<variant>.yaml files found", file=sys.stderr)
+            return 2
+        specs = [(path.name, load(path)) for path in paths]
+
+        p = Problems()
+        worst = 0
+        for name, spec in specs:
+            each = Problems()
+            validate_spec(spec, each)
+            worst = max(worst, each.report(name))
+        validate_family(specs, p)
+        worst = max(worst, p.report("variant family"))
+
+        if args.cmd == "variant-diff":
+            if worst > 1:
+                print("refusing to diff variants that do not validate", file=sys.stderr)
+                return worst
+            _write(render_variant_diff(specs), args.out)
+            return 0
+        return worst
 
     if args.cmd == "validate-bom":
         spec = load(pathlib.Path(args.spec)) if args.spec else None

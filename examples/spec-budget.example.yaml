@@ -1,0 +1,55 @@
+# Worked example: the BUDGET variant of one purchase.
+# Its sibling is spec-premium.example.yaml. Same `id`, different `variant`,
+# and revisions that move independently — budget is at r3, premium at r1.
+# REQ-002 is setpoint accuracy in BOTH files; only the threshold differs.
+# See the spec-variants skill, and docs/artefact-chain.md.
+spec_version: 1
+id: bench-psu-2026-09
+title: Bench power supply
+variant: budget
+variant_label: Budget
+variant_rationale: Cheapest unit that still clears the safety and accuracy floor; accept slower transient response.
+revision: 3
+revised: 2026-09-02
+status: active
+scope: A programmable bench DC power supply for electronics prototyping.
+out_of_scope:
+  - Rack mounting
+requirements:
+  - id: REQ-001
+    kind: must
+    title: Output voltage
+    statement: Supplies at least 30 V on a single channel.
+    parameter: max_voltage
+    operator: gte
+    value: 30
+    unit: V
+    verify: datasheet
+    evidence: Manufacturer datasheet output ratings table.
+    rationale: Covers the 24 V rails under test.
+  - id: REQ-002
+    kind: must
+    title: Setpoint accuracy
+    statement: Voltage setpoint accuracy within 0.5% of setting.
+    parameter: setpoint_accuracy
+    operator: lte
+    value: 0.5
+    unit: '%'
+    verify: datasheet
+    evidence: Datasheet accuracy specification.
+    rationale: Below this the supply cannot be trusted for calibration work.
+    variant_note: Relaxed from 0.1% — the tighter bar roughly doubles unit cost.
+  - id: REQ-004
+    kind: must
+    title: Overvoltage protection
+    statement: Has user-settable overvoltage protection.
+    parameter: ovp
+    operator: exists
+    verify: manual
+    evidence: Operating manual protection chapter.
+    rationale: Protects the boards under test.
+history:
+  - revision: 3
+    date: 2026-09-02
+    change: Relaxed REQ-002 to 0.5%.
+    reason: No candidate under budget met 0.1%.

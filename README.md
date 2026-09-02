@@ -37,7 +37,9 @@ document, so a claim can always be traced back to where it came from.
 | `spec-as-code` | The requirement as a versioned, machine-checkable artefact rather than prose that drifts |
 | `spec-sheet-retrieval` | The manufacturer's own datasheet, not a retailer's retyped summary of it |
 | `part-number-equivalence` | Whether a part number sold in one region is the same thing as the one you specced |
+| `spec-variants` | Parallel either/or bars — a budget spec and a premium spec for one purchase, versioned independently |
 | `evaluation-matrix` | Candidate-by-requirement conformance, with unknowns recorded as unknown rather than guessed |
+| `market-evaluator` | The ranked call after conformance: top three with price and sourcing, then best budget / overall / features |
 | `technical-sourcing` | Sourcing where specifications decide the purchase and price is a constraint |
 | `bom-build` | A multi-item list with quantities, alternates and rationale |
 | `rfq-package` | That list turned into something a supplier can quote against |
@@ -60,6 +62,9 @@ tax treatment and stock data actually work.
 | Specifications decide the purchase, not price or reviews | **`procurement-tools`** → `technical-sourcing` | this repo |
 | Chasing a manufacturer datasheet, or a part number across regions | **`procurement-tools`** → `spec-sheet-retrieval`, `part-number-equivalence` | this repo |
 | A multi-item list going to suppliers for quotes | **`procurement-tools`** → `bom-build`, `rfq-package` | this repo |
+| A budget option and a nicer-but-pricier option, both taken seriously | **`procurement-tools`** → `spec-variants` | this repo |
+| The options are scored — now which should I actually buy | **`procurement-tools`** → `market-evaluator` | this repo |
+| A folder for this decision inside a procurement repo I already have | **`procurement-tools`** → `workspace-folder` | this repo |
 | Surveying a whole product category before choosing | **`procurement-tools`** → `mkt-*` | this repo |
 | Planning a hardware build or rig | **`procurement-tools`** → `rig-*` | this repo |
 | Finding who stocks it locally, at what price, in stock when | **`shopping`** | [`Claude-Shopping-Plugin`](https://github.com/danielrosehill/Claude-Shopping-Plugin) |
@@ -152,17 +157,20 @@ All model-invocable, so a subagent can reach for them mid-task.
 
 **Technical-sourcing toolkit** — atomic and composable; each is usable alone, and they chain through shared file formats. See [Technical sourcing](#technical-sourcing).
 
-- **`technical-sourcing`** — the meta skill. Sequences the six below and says which steps this purchase can skip.
+- **`technical-sourcing`** — the meta skill. Sequences the ones below and says which steps this purchase can skip.
 - **`spec-as-code`** — versioned `spec.yaml` with stable requirement ids.
+- **`spec-variants`** — parallel either/or bars for one purchase (`spec-budget.yaml`, `spec-premium.yaml`), each versioned on its own axis, with a generated diff of what actually differs. Not needed for the ordinary one-spec case.
 - **`spec-sheet-retrieval`** — the manufacturer's own documentation, with the document and revision behind every value.
 - **`part-number-equivalence`** — which part numbers name the same product across regions and brands, and which look identical and are not.
 - **`evaluation-matrix`** — conformance checking against the spec: pass / fail / partial / unknown, never a score.
+- **`market-evaluator`** — the ranking step the matrix refuses to do. Top three in order, each with product, price and sourcing, then best budget / best overall / best for features. Ranks only what clears every disqualifying requirement.
 - **`bom-build`** — a shopping list written as requirements rather than products.
 - **`rfq-package`** — a BOM projected onto a supplier request.
 
 **Everything else:**
 
 - **`price-scan`** — model-invocable. Scans a shortlist of product URLs for current price, stock, shipping and landed cost across your configured marketplaces, from your own machine with the VPN exit set to the country each shop requires. Runs inside any purchase-research repo and writes results there. See [Price scanning](#price-scanning).
+- **`workspace-folder`** — adds a purchase folder inside a procurement repo you already have, instead of a standalone repo. No `git init`, commits to the parent, registers itself in the parent's index. The sibling of `new-workspace`.
 - **`/procurement-tools:new-workspace <name> [--variant=general-purchasing|market-landscape|tech-procurement|vendor-recommendations] [--local-only] [--private]`** — scaffolds a new workspace from one of four templates, personalises `CLAUDE.md` from `~/.claude/CLAUDE.md`, and (by default) creates a public GitHub repo for it. `market-landscape` defaults to private.
 
 ## Technical sourcing
@@ -175,7 +183,8 @@ requirements; the work is finding the ones that do not, and proving it.
 /procurement-tools:define-spec ──▶ spec-as-code ──▶ evaluation-matrix ──▶ recommend
                                     spec.yaml        criteria.md           │
                                     REQ ids          conformance/*.json    │
-                                        │            matrix.md             │
+                                    (or spec-*.yaml  matrix.md             │
+                                     per variant)    market-evaluator      │
                                         ▼                ▲                 ▼
                                    bom-build ────────────┤            price-scan
                                    bom.yaml, LINE ids    │

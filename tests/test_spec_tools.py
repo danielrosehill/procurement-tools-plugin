@@ -24,7 +24,11 @@ from spec_tools import (  # noqa: E402
     render_criteria,
     render_matrix,
     validate_bom,
+    parse_spec_ref,
+    render_variant_diff,
+    spec_ident,
     validate_conformance,
+    validate_family,
     validate_spec,
 )
 
@@ -474,6 +478,211 @@ def test_rfq_keeps_an_unidentified_line_quotable() -> None:
     check("described line has no sku", "sku" in rfq["items"][0], False)
     check("described line still has a description",
           bool(rfq["items"][0]["description"]), True)
+
+
+# ---------------------------------------------------------------------------
+# Variants — parallel either/or branches, each versioned on its own axis
+# ---------------------------------------------------------------------------
+
+def a_budget_spec() -> dict:
+    spec = copy.deepcopy(a_spec())
+    spec["variant"] = "budget"
+    spec["variant_label"] = "Budget"
+    spec["variant_rationale"] = "Cheapest that still clears the safety floor."
+    spec["revision"] = 3
+    spec["history"] = (spec.get("history") or []) + [
+        {"revision": 3, "date": "2026-02-01", "change": "Branched as the budget variant.",
+         "reason": "Two real bars for one purchase."},
+    ]
+    return spec
+
+
+def a_premium_spec() -> dict:
+    spec = copy.deepcopy(a_spec())
+    spec["variant"] = "premium"
+    spec["variant_label"] = "Premium"
+    spec["variant_rationale"] = "No compromise on range; accept the cost."
+    spec["variant_of"] = "budget"
+    spec["revision"] = 1
+    # A new sibling starts a fresh history: the original's revisions describe a
+    # spec that no longer exists under that name.
+    spec["history"] = [
+        {"revision": 1, "date": "2026-02-01", "change": "Branched from budget.",
+         "reason": "Range bar worth paying for if the market has it."},
+    ]
+    for req in spec["requirements"]:
+        if req["id"] == "REQ-002":
+            req["value"] = 150
+            req["variant_note"] = "Held high; this variant exists to buy the range."
+    return spec
+
+
+def a_family() -> list:
+    return [("spec-budget.yaml", a_budget_spec()), ("spec-premium.yaml", a_premium_spec())]
+
+
+def test_unvaried_spec_stays_valid_and_prints_without_a_variant() -> None:
+    """The common case must be untouched by variants existing."""
+    check("no variant fields needed", errors_of(validate_spec, a_spec()), [])
+    check("ident omits the @ part", spec_ident(a_spec()), "widget-2026-01 r2")
+
+
+def test_variant_identity_is_id_variant_revision() -> None:
+    check("variant ident", spec_ident(a_budget_spec()), "widget-2026-01@budget r3")
+
+
+def test_revisions_are_independent_per_variant() -> None:
+    """Budget at r3 and premium at r1 are both current — neither is stale."""
+    check("family accepts differing revisions", errors_of(validate_family, a_family()), [])
+
+
+def test_variant_field_without_a_variant_is_an_error() -> None:
+    spec = a_spec()
+    spec["variant_rationale"] = "orphaned"
+    errs = errors_of(validate_spec, spec)
+    check("orphan variant field rejected", len(errs), 1)
+    check_has("names the field", errs[0], "variant_rationale")
+
+
+def test_variant_must_be_a_slug_and_not_its_own_parent() -> None:
+    spec = a_budget_spec()
+    spec["variant"] = "Budget Option"
+    check("non-slug variant rejected", len(errors_of(validate_spec, spec)), 1)
+    spec = a_budget_spec()
+    spec["variant_of"] = "budget"
+    errs = errors_of(validate_spec, spec)
+    check("self-parent rejected", len(errs), 1)
+    check_has("explains siblings", errs[0], "siblings")
+
+
+def test_variant_without_a_rationale_warns() -> None:
+    spec = a_budget_spec()
+    del spec["variant_rationale"]
+    check_has("rationale warned", " ".join(warnings_of(validate_spec, spec)), "trade-off")
+
+
+def test_family_rejects_specs_of_different_purchases() -> None:
+    family = a_family()
+    family[1][1]["id"] = "something-else"
+    errs = errors_of(validate_family, family)
+    check("differing ids rejected", len(errs), 1)
+    check_has("explains why", errs[0], "not variants of one purchase")
+
+
+def test_family_rejects_a_bare_spec_beside_variants() -> None:
+    """A spec.yaml surviving next to spec-budget.yaml is ambiguous, not merely untidy."""
+    family = [("spec.yaml", a_spec()), ("spec-budget.yaml", a_budget_spec())]
+    errs = errors_of(validate_family, family)
+    check("bare spec rejected", len(errs), 1)
+    check_has("explains ambiguity", errs[0], "which one is in force")
+
+
+def test_family_rejects_a_duplicate_variant_slug() -> None:
+    family = a_family()
+    family[1][1]["variant"] = "budget"
+    check("duplicate variant rejected", len(errors_of(validate_family, family)), 1)
+
+
+def test_req_id_naming_a_different_subject_across_variants_is_an_error() -> None:
+    """The property everything else rests on: REQ-002 means one subject everywhere."""
+    family = a_family()
+    for req in family[1][1]["requirements"]:
+        if req["id"] == "REQ-002":
+            req["parameter"] = "battery_life"
+    errs = errors_of(validate_family, family)
+    check("subject drift rejected", len(errs), 1)
+    check_has("names the id", errs[0], "REQ-002")
+    check_has("says to reallocate", errs[0], "Allocate a new id")
+
+
+def test_a_requirement_in_only_one_variant_is_fine() -> None:
+    family = a_family()
+    family[1][1]["requirements"].append({
+        "id": "REQ-009", "title": "Rugged", "kind": "must",
+        "statement": "IP67 rated.", "parameter": "ip_rating", "operator": "eq",
+        "value": "IP67", "verify": "datasheet", "evidence": "Datasheet ingress rating.",
+        "rationale": "Outdoor use.",
+    })
+    check("one-sided requirement allowed", errors_of(validate_family, family), [])
+    diff = render_variant_diff(family)
+    check_has("listed as variant-only", diff, "Present in some variants only")
+    check_has("shows not required", diff, "not required")
+
+
+def test_variant_diff_separates_shared_from_differing() -> None:
+    diff = render_variant_diff(a_family())
+    check_has("differing section", diff, "Same requirement, different bar")
+    check_has("shows both bars", diff, "≥ 50 m")
+    check_has("shows the other bar", diff, "≥ 150 m")
+    check_has("carries the note", diff, "this variant exists to buy the range")
+    check_has("states the trade-off", diff, "No compromise on range")
+
+
+def test_variant_diff_ignores_prose_differences() -> None:
+    """Reworded statements are expected across variants; flagging them buries real deltas."""
+    family = a_family()
+    for req in family[1][1]["requirements"]:
+        req["statement"] = req["statement"] + " (premium wording)"
+        req["rationale"] = "Different prose entirely."
+    diff = render_variant_diff(family)
+    check_has("prose alone is not a divergence", diff, "1 differ")
+
+
+def test_identical_variants_are_called_out() -> None:
+    family = [("spec-a.yaml", a_budget_spec()), ("spec-b.yaml", a_budget_spec())]
+    family[1][1]["variant"] = "premium"
+    check_has("convergence suggested", render_variant_diff(family), "identical")
+
+
+def test_conformance_judged_against_another_variant_is_an_error_not_a_warning() -> None:
+    """A budget verdict says nothing about the premium bar, so it is not merely stale."""
+    rec = a_conformance()
+    rec["spec"]["variant"] = "budget"
+    errs = errors_of(validate_conformance, rec, a_premium_spec())
+    check("cross-variant record rejected", len(errs), 1)
+    check_has("explains the danger", errs[0], "belongs in a different matrix")
+
+
+def test_conformance_matching_its_variant_is_accepted() -> None:
+    rec = a_conformance()
+    rec["spec"]["variant"] = "budget"
+    rec["spec"]["revision"] = 3
+    check("matching variant accepted", errors_of(validate_conformance, rec, a_budget_spec()), [])
+
+
+def test_matrix_names_the_variant_it_judges() -> None:
+    rec = a_conformance()
+    rec["spec"]["variant"] = "budget"
+    rec["spec"]["revision"] = 3
+    out = render_matrix(a_budget_spec(), [(pathlib.Path("c.json"), rec)])
+    check_has("heading names variant", out, "Budget variant")
+    check_has("warns against generalising", out, "not thereby cleared under a sibling variant")
+    check_has("cites the right file", out, "spec-budget.yaml")
+
+
+def test_parse_spec_ref_handles_every_shape() -> None:
+    check("bare id", parse_spec_ref("widget-2026-01"), ("widget-2026-01", None, []))
+    check("with variant", parse_spec_ref("widget-2026-01@budget"),
+          ("widget-2026-01", "budget", []))
+    check("with reqs", parse_spec_ref("widget-2026-01#REQ-001,REQ-004"),
+          ("widget-2026-01", None, ["REQ-001", "REQ-004"]))
+    check("with both", parse_spec_ref("widget-2026-01@budget#REQ-001"),
+          ("widget-2026-01", "budget", ["REQ-001"]))
+
+
+def test_bom_line_without_a_variant_warns_when_the_spec_has_one() -> None:
+    bom = a_bom()
+    bom["lines"][0]["spec_ref"] = "widget-2026-01#REQ-001"
+    warns = " ".join(warnings_of(validate_bom, bom, a_budget_spec()))
+    check_has("undefined variant warned", warns, "which variant")
+
+
+def test_variant_does_not_trip_the_id_numbering_heuristic() -> None:
+    """A variant omitting a sibling's id is normal, not a sign of hand-editing."""
+    spec = a_budget_spec()
+    spec["requirements"] = [r for r in spec["requirements"] if r["id"] != "REQ-002"]
+    warns = " ".join(warnings_of(validate_spec, spec))
+    check_lacks("no numbering warning on a variant", warns, "highest id is")
 
 
 def main() -> int:

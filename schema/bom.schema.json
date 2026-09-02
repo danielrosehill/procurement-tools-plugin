@@ -4,55 +4,135 @@
   "title": "procurement-tools bill of materials",
   "description": "A shopping list expressed as requirements rather than products. Written as YAML (bom.yaml). Lines start described-but-unidentified and acquire a part number as research settles them; a line is quotable at either stage, which is what lets an RFQ go out before the choice is made.",
   "type": "object",
-  "required": ["bom_version", "id", "title", "revision", "lines"],
+  "required": [
+    "bom_version",
+    "id",
+    "title",
+    "revision",
+    "lines"
+  ],
   "additionalProperties": false,
   "properties": {
-    "bom_version": { "type": "integer", "const": 1 },
-    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
-    "title": { "type": "string" },
-    "revision": { "type": "integer", "minimum": 1 },
-    "revised": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
-    "purpose": { "type": "string", "description": "What the assembled set is for. Suppliers quote better against a stated purpose, and it is what lets them propose a substitution that actually works." },
-    "currency": { "type": "string" },
-    "destination": { "type": "string", "description": "Address profile id, matching addresses.yaml used by price-scan." },
-    "required_by": { "type": "string" },
+    "bom_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revised": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "What the assembled set is for. Suppliers quote better against a stated purpose, and it is what lets them propose a substitution that actually works."
+    },
+    "currency": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "string",
+      "description": "Address profile id, matching addresses.yaml used by price-scan."
+    },
+    "required_by": {
+      "type": "string"
+    },
     "lines": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "description", "quantity"],
+        "required": [
+          "id",
+          "description",
+          "quantity"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^LINE-[0-9]{3,}$", "description": "Stable and never reused, so a supplier quoting against revision 2 can still be matched to revision 4." },
+          "id": {
+            "type": "string",
+            "pattern": "^LINE-[0-9]{3,}$",
+            "description": "Stable and never reused, so a supplier quoting against revision 2 can still be matched to revision 4."
+          },
           "description": {
             "type": "string",
             "description": "Vendor-neutral description of what the line has to be. Written so a supplier who has never seen the spec can quote it."
           },
-          "quantity": { "type": ["number", "string"] },
-          "unit": { "type": "string", "default": "ea" },
-          "spec_ref": { "type": "string", "description": "Spec id, optionally with requirement ids: 'laser-measure-2026-08' or 'laser-measure-2026-08#REQ-001,REQ-004'." },
+          "quantity": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "default": "ea"
+          },
+          "spec_ref": {
+            "type": "string",
+            "description": "Spec id, optionally with a variant and requirement ids: 'laser-measure-2026-08', 'laser-measure-2026-08@budget', or 'laser-measure-2026-08@budget#REQ-001,REQ-004'. The @variant part is required whenever the spec has variants, since the same line can be justified by different requirements under each."
+          },
           "identified": {
             "type": "object",
             "description": "Present once a specific product has been chosen for this line. Absent means the line is still a requirement, which is a legitimate state to send to a supplier.",
             "additionalProperties": false,
             "properties": {
-              "manufacturer": { "type": "string" },
-              "part_number": { "type": "string" },
-              "region": { "type": "string" },
-              "equivalence_ref": { "type": "string" },
-              "conformance_ref": { "type": "string" }
+              "manufacturer": {
+                "type": "string"
+              },
+              "part_number": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "equivalence_ref": {
+                "type": "string"
+              },
+              "conformance_ref": {
+                "type": "string"
+              }
             }
           },
           "substitution": {
             "type": "string",
-            "enum": ["allowed", "equivalent-only", "none"],
+            "enum": [
+              "allowed",
+              "equivalent-only",
+              "none"
+            ],
             "default": "equivalent-only",
             "description": "allowed = supplier may propose anything meeting the description. equivalent-only = must meet every referenced requirement. none = this exact part number, usually because it has to interoperate with something already owned."
           },
-          "target_price": { "type": ["number", "string"], "description": "Per-unit. Carried into the RFQ only when the user opts in — it anchors the supplier." },
-          "criticality": { "type": "string", "enum": ["required", "optional", "contingent"], "default": "required", "description": "contingent = only needed if another line resolves a particular way; say which in notes." },
-          "notes": { "type": "string" }
+          "target_price": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Per-unit. Carried into the RFQ only when the user opts in — it anchors the supplier."
+          },
+          "criticality": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "contingent"
+            ],
+            "default": "required",
+            "description": "contingent = only needed if another line resolves a particular way; say which in notes."
+          },
+          "notes": {
+            "type": "string"
+          }
         }
       }
     },
@@ -61,12 +141,24 @@
       "description": "Optional grouping of lines by subsystem or by which supplier is likely to carry them. A group is the natural unit of one RFQ.",
       "items": {
         "type": "object",
-        "required": ["name", "lines"],
+        "required": [
+          "name",
+          "lines"
+        ],
         "additionalProperties": false,
         "properties": {
-          "name": { "type": "string" },
-          "note": { "type": "string" },
-          "lines": { "type": "array", "items": { "type": "string" } }
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -74,12 +166,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["revision", "change"],
+        "required": [
+          "revision",
+          "change"
+        ],
         "additionalProperties": false,
         "properties": {
-          "revision": { "type": "integer" },
-          "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
-          "change": { "type": "string" }
+          "revision": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "change": {
+            "type": "string"
+          }
         }
       }
     }

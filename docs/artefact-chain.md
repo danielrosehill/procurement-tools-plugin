@@ -14,11 +14,14 @@ consumed by others, and joined to the rest by **ids that are never reused**.
 | `spec.md` | `/procurement-tools:define-spec`, `:intake` | — | Prose spec: context, rationale, history. For a person. |
 | `search-terms.md` | `/procurement-tools:define-spec` | — | Search vocabulary by register. |
 | `spec.yaml` | `spec-as-code` | `schema/spec.schema.json` | Requirements with stable `REQ-nnn` ids. For a machine. |
+| `spec-<variant>.yaml` | `spec-variants` | `schema/spec.schema.json` | Parallel either/or bars for the same purchase. Replaces `spec.yaml` once branched. |
+| `spec-variants.md` | `spec_tools.py variant-diff` | — | **Generated.** What actually differs between the variants. |
 | `data/datasheets/<mfr>-<pn>.json` | `spec-sheet-retrieval` | `schema/datasheet.schema.json` | Published values with the document and revision behind them. |
 | `data/equivalence/<family>.json` | `part-number-equivalence` | `schema/equivalence.schema.json` | Which part numbers name the same product, with confidence. |
 | `evaluation/criteria.md` | `spec_tools.py criteria` | — | **Generated.** The brief handed to research subagents. |
-| `evaluation/conformance/<candidate>.json` | `evaluation-matrix` | `schema/conformance.schema.json` | One candidate judged against one spec revision. |
-| `evaluation/matrix.md` | `spec_tools.py matrix` | — | **Generated.** The conformance matrix and what it says about the field. |
+| `evaluation/conformance/<candidate>.json` | `evaluation-matrix` | `schema/conformance.schema.json` | One candidate judged against one revision of one variant. With variants, nested under `conformance/<variant>/`. |
+| `evaluation/matrix.md` | `spec_tools.py matrix` | — | **Generated.** The conformance matrix and what it says about the field. One per variant. |
+| `evaluation/recommendation.md` | `market-evaluator` | — | The ranked call: top three with price and sourcing, then category picks. One per variant. |
 | `bom.yaml` | `bom-build` | `schema/bom.schema.json` | Line items with stable `LINE-nnn` ids. |
 | `rfq/RFQ-YYYY-NNN.json` | `rfq-package` | *external — see below* | Supplier request, in the `dsrholdings-rfq` renderer's input shape. |
 | `price-watchlist.yaml`, `data/price-scans/` | `price-scan` | `examples/price-watchlist.example.yaml` | What it costs delivered, today. |
@@ -32,8 +35,10 @@ validate cleanly and answer the wrong question.
 
 ```
 spec.yaml            REQ-001 ─┬─▶ conformance.cells[].req
-                              ├─▶ bom.lines[].spec_ref  ("spec-id#REQ-001,REQ-004")
+                              ├─▶ bom.lines[].spec_ref  ("spec-id@variant#REQ-001,REQ-004")
                               └─▶ datasheet.specs[].req
+
+spec identity        id + variant + revision ──▶ conformance.spec.{id,variant,revision}
 
 bom.yaml             LINE-001 ──▶ supplier quotes, RFQ line order
 
@@ -56,9 +61,52 @@ remain readable.
 `history`. Conformance records pin the spec revision they were judged against.
 
 That pinning is the whole point: `validate-conformance` reports a record
-evaluated against a superseded revision as **stale**. The correct response is to
+evaluated against a superseded revision of the **same variant** as **stale**. The correct response is to
 re-check the cells the revision actually touched and then bump the record — not
 to bump the record, which converts a stale answer into a fresh-looking one.
+
+## Variants: the second axis
+
+A spec's identity is the triple **`id` + `variant` + `revision`**.
+
+- **`id`** names the purchase. Shared by every variant of it.
+- **`variant`** is a parallel, either/or branch — `budget` against `premium`.
+  Optional, and **absent for the ordinary case** of one spec with iterative
+  revisions, which is unchanged by any of this.
+- **`revision`** moves linearly *within* one variant, independently of siblings.
+  `budget r3` and `premium r1` are both current.
+
+A revision supersedes what came before it. A variant supersedes nothing — it
+stands beside its siblings until one is chosen.
+
+```
+spec.yaml                    no variants: one spec, iterative revisions
+spec-budget.yaml   r3   ─┐
+spec-premium.yaml  r1   ─┴─  same id, parallel bars, independent revisions
+```
+
+Once branched, a bare `spec.yaml` must not survive alongside variant files —
+which spec is in force would be undefined. `validate-variants` errors on it.
+
+**Requirement ids name the same subject in every variant.** `REQ-002` is setpoint
+accuracy in both; only the threshold moves. This is what lets one candidate be
+judged against several variants without re-researching it, and what makes
+`variant-diff` readable. Reusing an id for a different `parameter` across
+variants is an **error**: every cross-variant comparison downstream would
+silently become meaningless. A requirement needed by only one variant gets a new
+id and is simply absent from the others.
+
+Conformance records therefore pin the variant as well as the revision, and a
+record naming a different variant is an **error rather than a staleness warning** —
+the same datasheet value can be a `pass` under one bar and a `fail` under
+another, so the record belongs in a different matrix, not lower down this one.
+
+```bash
+python3 scripts/spec_tools.py validate-variants .
+python3 scripts/spec_tools.py variant-diff . -o spec-variants.md
+```
+
+See the `spec-variants` skill for branching, diffing and converging.
 
 ## Validation gates
 

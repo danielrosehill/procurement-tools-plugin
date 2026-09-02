@@ -1,0 +1,62 @@
+# Worked example: the PREMIUM variant of one purchase.
+# Sibling of spec-budget.example.yaml. Note REQ-007, which exists only here —
+# a requirement one variant needs and the other does not gets its own id and is
+# simply absent from the sibling, rather than being forced into both.
+spec_version: 1
+id: bench-psu-2026-09
+title: Bench power supply
+variant: premium
+variant_label: Premium
+variant_rationale: No compromise on accuracy or transient response; accept roughly 2x cost.
+variant_of: budget
+revision: 1
+revised: 2026-09-02
+status: active
+scope: A programmable bench DC power supply for electronics prototyping.
+out_of_scope:
+  - Rack mounting
+requirements:
+  - id: REQ-001
+    kind: must
+    title: Output voltage
+    statement: Supplies at least 30 V on a single channel.
+    parameter: max_voltage
+    operator: gte
+    value: 30
+    unit: V
+    verify: datasheet
+    evidence: Manufacturer datasheet output ratings table.
+    rationale: Covers the 24 V rails under test.
+  - id: REQ-002
+    kind: must
+    title: Setpoint accuracy
+    statement: Voltage setpoint accuracy within 0.1% of setting.
+    parameter: setpoint_accuracy
+    operator: lte
+    value: 0.1
+    unit: '%'
+    verify: datasheet
+    evidence: Datasheet accuracy specification.
+    rationale: Below this the supply cannot be trusted for calibration work.
+    variant_note: Held at 0.1% — this variant exists precisely to buy that accuracy.
+  - id: REQ-004
+    kind: must
+    title: Overvoltage protection
+    statement: Has user-settable overvoltage protection.
+    parameter: ovp
+    operator: exists
+    verify: manual
+    evidence: Operating manual protection chapter.
+    rationale: Protects the boards under test.
+  - id: REQ-007
+    kind: must
+    title: Transient response
+    statement: Recovers to within 0.1% in under 50 us after a load step.
+    parameter: transient_recovery
+    operator: lte
+    value: 50
+    unit: us
+    verify: datasheet
+    evidence: Datasheet transient response figure.
+    rationale: Required for the switching loads under test.
+    variant_note: Absent from budget entirely — this is the requirement that splits the variants.
