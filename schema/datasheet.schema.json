@@ -33,7 +33,7 @@
           "language": { "type": "string" },
           "local_path": { "type": "string", "description": "Where the PDF was saved in the repo, when it was saved." },
           "sha256": { "type": "string", "description": "Of the saved file. Manufacturers replace documents at the same URL without changing the filename." },
-          "accessed_via": { "type": "string", "description": "Which route got it: WebFetch, geo-egress il/us, playwright, claude-in-chrome, distributor mirror." }
+          "accessed_via": { "type": "string", "description": "Which route got it: WebFetch, claude-in-chrome, curl, playwright, distributor mirror." }
         }
       }
     },

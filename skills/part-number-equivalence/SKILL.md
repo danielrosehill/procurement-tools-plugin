@@ -76,12 +76,19 @@ Manufacturer and distributor catalogues serve different content per country. A
 lookup for a US part number that egresses from Israel returns the European
 catalogue, finds nothing, and reads as "not sold in the US".
 
-So: `WebFetch` first, and when the answer depends on which market you are
-looking at, use `mcp__gateway__geo-egress__fetch_markdown` with `egress` passed
-**explicitly** — `"us"` for the US catalogue, `"il"` for the Israeli one.
-`egress` defaults to `"il"`, and a wrong-country result here is an HTTP 200 with
-plausible content. Run `mcp__gateway__geo-egress__verify_egress()` before
-drawing an availability conclusion.
+So: `WebFetch` first, then `claude-in-chrome` if the catalogue blocks a plain
+fetch or renders under JavaScript. **Neither can make the request appear to
+come from another country** — there is currently no US egress (the geo-egress
+server was retired on 2026-09-02), and both routes leave from the user's own
+location or the cloud. A wrong-country result is an HTTP 200 with plausible content, so:
+
+- Use a region selector, a country-specific URL (`/us/en/…`) or a regional
+  distributor's catalogue where the site offers one, and confirm on the page
+  itself which market it is showing.
+- When the answer depends on a market you cannot reach that way, do **not**
+  conclude "not sold in the US". Record availability for that market as
+  unverified and tell the user the capability to check it from that country is
+  missing.
 
 Record which market each finding came from. `availability.sold_in` is a claim
 about a market, and it is only as good as the exit it was observed from.

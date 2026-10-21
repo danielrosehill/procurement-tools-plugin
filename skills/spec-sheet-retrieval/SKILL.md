@@ -63,9 +63,18 @@ manufacturer sites.
 Escalate on an actual failure, not pre-emptively:
 
 1. `WebFetch` — default.
-2. `mcp__gateway__geo-egress__fetch_markdown` / `_html` — when the site geo-fences, or when you need the **regional** document. Pass `egress` explicitly: `"il"` for Israeli catalogues and pricing, `"us"` for US catalogues. The default is `"il"`, so a US spec fetched without the argument returns a European or Israeli document with an HTTP 200 and no signal.
-3. `mcp__gateway__playwright__browser_navigate` + `browser_snapshot` — when the download list renders under JavaScript, which is common on manufacturer support portals.
-4. `claude-in-chrome` — when the document sits behind a login or a professional-account wall.
+2. `claude-in-chrome` (`mcp__claude-in-chrome__*`) — when the download list renders under JavaScript (common on manufacturer support portals), when the site blocks a plain fetch, or when the document sits behind a login or a professional-account wall. It is the user's real browser on their own machine, so it also serves the document for the user's own country.
+3. `curl` via Bash — for headers, redirects and raw PDF downloads.
+4. `mcp__gateway__playwright__*` — last fallback only, when the routes above genuinely cannot do it.
+
+**There is no route that makes a fetch appear to come from another country**
+(the geo-egress server was retired on 2026-09-02). Every route above leaves
+from the user's own location or from the cloud. When you need a **regional** document — the US
+datasheet rather than the EU one — look for it by direct URL or region selector
+on the manufacturer's site, or on a regional distributor's mirror; do not
+assume the document you were served is the one for the market you asked about.
+If you cannot get the regional version, say so and record the region you
+actually got.
 
 Record which route worked in `documents[].accessed_via`, and the egress country
 in `egress`. Where region changed the document, that field is the only thing
