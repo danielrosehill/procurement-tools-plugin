@@ -6,16 +6,16 @@ This workspace runs **one purchase decision** from spec to PDF report. One repo 
 
 ## Two-tier preferences model (+ optional buyer-profile bias)
 
-**Standing preferences** live in **memory** (via Mem0 MCP — recommended). Per-purchase details live in **`spec.md`** at the repo root. This separation is deliberate: the things that *always* apply to the user (their country, trusted brands, markup ceiling) don't belong in each new repo — they belong in memory, loaded fresh into every new purchase workspace.
+**Standing preferences** live in **memory** (the gateway `memory` server — recommended). Per-purchase details live in **`spec.md`** at the repo root. This separation is deliberate: the things that *always* apply to the user (their country, trusted brands, markup ceiling) don't belong in each new repo — they belong in memory, loaded fresh into every new purchase workspace.
 
-- **Memory (Mem0)** — country, currency, VAT status, trusted brands, avoided brands, preferred vendors, avoided vendors, markup threshold, review score floor, risk tolerance, international shipping tolerance, email for PDF
+- **Memory (gateway `memory` server)** — country, currency, VAT status, trusted brands, avoided brands, preferred vendors, avoided vendors, markup threshold, review score floor, risk tolerance, international shipping tolerance, email for PDF
 - **`spec.md` (this repo)** — what's being bought, must-haves, hard nos, nice-to-haves, budget, timeline, this-purchase priorities, this-purchase overrides to standing prefs, context/history
-- **`buyer-profiles/` (optional)** — named purchasing archetypes (BIFL, budget, minimalist, etc.) that the user can apply to this purchase via `/apply-profile`. Works as a fallback for users without Mem0, or as a shortcut for users who want to reframe a purchase quickly. Profile content is additive over standing prefs and `spec.md` — must-haves and hard nos always win.
+- **`buyer-profiles/` (optional)** — named purchasing archetypes (BIFL, budget, minimalist, etc.) that the user can apply to this purchase via `/apply-profile`. Works as a fallback for users without standing preferences, or as a shortcut for users who want to reframe a purchase quickly. Profile content is additive over standing prefs and `spec.md` — must-haves and hard nos always win.
 
 ## The workflow
 
 ```
-/load-preferences   → pull standing prefs from Mem0 memory
+/load-preferences   → pull standing prefs from memory
 /save-preferences   → (one-time or when updating) persist standing prefs to memory
 /intake             → build spec.md (per-purchase only; skips standing fields)
 /research           → evaluate candidates against spec + standing prefs
@@ -24,20 +24,20 @@ This workspace runs **one purchase decision** from spec to PDF report. One repo 
 
 Four phases in order: **intake → spec → research → report.** Preference management is a sidecar workflow, not a phase.
 
-## Mem0 MCP integration
+## Memory integration
 
-The recommended memory backend is [Mem0](https://mem0.ai) exposed as an MCP server. With Mem0:
+The recommended memory backend is the `memory` upstream on the MCP gateway (tools `mcp__gateway__memory__*`, namespace `personal`, tag `shopping_preferences`). With it:
 
 - Preferences persist across repos, machines, sessions
 - Update once (via `/save-preferences`), applied to all future purchases automatically
 - Each new template instance `/load-preferences` → snapshot copied into `spec.md` for audit
 
-If Mem0 MCP isn't available, the commands fall back to:
+If the gateway `memory` tools aren't available, the commands fall back to:
 
 1. A local file: `<plugin-data-dir>/shopping-preferences.md` — resolved via `$CLAUDE_USER_DATA/procurement-tools/` (see the `meta-tools:plugin-data-storage` canonical skill)
 2. Inline prompting during `/intake` (last resort — user will be re-asked each time)
 
-The templates degrade gracefully. Mem0 is the "power user" path.
+The templates degrade gracefully.
 
 ## Repository Structure
 
@@ -83,7 +83,7 @@ No `purchases/active|completed/` nesting. No per-repo `buyer-profile.md`. The re
 
 `/intake` should call `/load-preferences` automatically as step 0. Combined behaviour:
 
-1. Load standing preferences from Mem0 (or fallback file)
+1. Load standing preferences from memory (or fallback file)
 2. Snapshot them into the "Standing preferences snapshot" section of `spec.md`
 3. Ask only the per-purchase questions — **never re-ask standing fields**
 4. Explicitly capture **must-haves** and **hard nos / dealbreakers** as distinct sections
@@ -232,8 +232,8 @@ Core flow:
 
 | Command | Purpose |
 |---------|---------|
-| `/load-preferences` | Pull standing shopping prefs from Mem0 memory (or fallback file) |
-| `/save-preferences` | Persist standing prefs to Mem0 — one-time or when updating |
+| `/load-preferences` | Pull standing shopping prefs from memory (or fallback file) |
+| `/save-preferences` | Persist standing prefs to memory — one-time or when updating |
 | `/intake` | Populate `spec.md` — per-purchase only (must-haves + hard nos distinctly) |
 | `/apply-profile [profile(s)]` | Bias this purchase toward a named buyer archetype (BIFL, budget, minimalist, etc.). Single or combined (e.g. `bifl+power-user`). Optional. |
 | `/research` | Evaluate candidates against the spec + standing prefs + profile (if applied) |

@@ -137,4 +137,4 @@
 
 ---
 
-*Spec populated via `/intake`. Standing preferences loaded via `/load-preferences` from Mem0 MCP (if configured).*
+*Spec populated via `/intake`. Standing preferences loaded via `/load-preferences` from the gateway `memory` server (if available).*

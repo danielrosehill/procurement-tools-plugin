@@ -4,7 +4,7 @@ Pre-built purchasing archetypes. Use them as a **fallback reference** when you d
 
 ## Why these exist
 
-`spec.md` captures what you're buying. Standing preferences (in Mem0 or the fallback file) capture *how* you shop in general. But sometimes you want a **named pattern** — "this is a BIFL purchase", "this is the budget-optimised one", "treat this like a power-user purchase" — without re-specifying every priority from scratch.
+`spec.md` captures what you're buying. Standing preferences (in memory or the fallback file) capture *how* you shop in general. But sometimes you want a **named pattern** — "this is a BIFL purchase", "this is the budget-optimised one", "treat this like a power-user purchase" — without re-specifying every priority from scratch.
 
 Profiles are that named pattern. They ship with the template so a fresh repo is usable even with zero memory configured.
 

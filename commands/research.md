@@ -15,7 +15,7 @@ Evaluate all candidate products against the spec and produce `from-ai/research.m
 Apply two sources of constraint throughout evaluation:
 
 - **Per-purchase** (from `spec.md`): must-haves, hard nos, nice-to-haves, this-purchase priorities, per-purchase overrides
-- **Standing** (from the snapshot in `spec.md`, originally loaded from Mem0): country/currency, standing avoided brands, default markup threshold, review score floor, international shipping tolerance
+- **Standing** (from the snapshot in `spec.md`, originally loaded from memory): country/currency, standing avoided brands, default markup threshold, review score floor, international shipping tolerance
 
 Per-purchase overrides beat standing defaults. If `spec.md` overrides markup threshold to 60%, use 60% instead of the standing default.
 

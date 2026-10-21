@@ -4,7 +4,7 @@ You are running the intake for this purchase. The goal is to populate `spec.md` 
 
 **Two-tier model:**
 
-- **Standing preferences** (country, currency, trusted/avoided brands, markup threshold, risk tolerance, etc.) live in **memory** via Mem0 MCP. Load them first with `/load-preferences` — don't re-ask.
+- **Standing preferences** (country, currency, trusted/avoided brands, markup threshold, risk tolerance, etc.) live in **memory** (the gateway `memory` server). Load them first with `/load-preferences` — don't re-ask.
 - **Per-purchase spec** (`spec.md`) holds only what's specific to *this* decision: what you're buying, must-haves, hard nos, budget, timeline, priorities, context.
 
 **One repo = one purchase.**
@@ -13,8 +13,8 @@ You are running the intake for this purchase. The goal is to populate `spec.md` 
 
 Before asking anything, run `/load-preferences`:
 
-- If preferences load from Mem0 or the local fallback file — great, the snapshot is now in `spec.md` → don't re-ask those fields
-- If no preferences are found — tell the user: "No standing preferences yet. You have three options: **(a)** run `/save-preferences` first (one-time setup, applies to all future purchases) — recommended if you shop frequently; **(b)** apply a **buyer profile** from `buyer-profiles/` (BIFL, budget, minimalist, etc.) as a shortcut pattern for just this purchase — good if you don't want to set up Mem0 yet; **(c)** skip and I'll ask you the standing questions inline now — but you'll be re-asked in every future workspace. Which do you prefer?"
+- If preferences load from memory or the local fallback file — great, the snapshot is now in `spec.md` → don't re-ask those fields
+- If no preferences are found — tell the user: "No standing preferences yet. You have three options: **(a)** run `/save-preferences` first (one-time setup, applies to all future purchases) — recommended if you shop frequently; **(b)** apply a **buyer profile** from `buyer-profiles/` (BIFL, budget, minimalist, etc.) as a shortcut pattern for just this purchase — good if you don't want to set up standing preferences yet; **(c)** skip and I'll ask you the standing questions inline now — but you'll be re-asked in every future workspace. Which do you prefer?"
   - If (b): after finishing the per-purchase intake, prompt the user to run `/apply-profile` (or do it inline).
 
 ## Step 1: Read existing state
@@ -110,7 +110,7 @@ Capture into the "Per-purchase overrides" table in `spec.md`.
 ```
 Welcome. Let me set up the spec for this purchase.
 
-[Runs /load-preferences — reports: "Loaded standing prefs from Mem0 — [summary of loaded fields]."]
+[Runs /load-preferences — reports: "Loaded standing prefs from memory — [summary of loaded fields]."]
 
 Good — I'll apply those. A few questions specific to this purchase:
 

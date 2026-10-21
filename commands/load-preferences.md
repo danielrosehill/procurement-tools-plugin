@@ -23,32 +23,27 @@ Things that apply to **every** purchase the user makes — not to this specific 
 - **Thresholds**: default markup ceiling (% over international RRP), review score floor, risk tolerance
 - **Delivery**: email for PDF report
 
-These are stored in **memory** (via Mem0 MCP, recommended), not in any per-purchase repo. One update, all future purchases benefit.
+These are stored in **memory** (the `memory` server on the MCP gateway, recommended), not in any per-purchase repo. One update, all future purchases benefit.
 
-## Preferred storage: Mem0 MCP
+## Preferred storage: gateway `memory` server
 
-The recommended persistence layer is [Mem0](https://mem0.ai), exposed as an MCP server. If the Mem0 MCP is configured:
+The recommended persistence layer is the `memory` upstream on the MCP gateway (tools `mcp__gateway__memory__*`). The tools are deferred — load them with `ToolSearch` (`select:mcp__gateway__memory__recall,mcp__gateway__memory__list_memories`) before the first call. If they resolve:
 
-1. Query memories tagged `shopping_preferences` (or scoped to the `shopping_preferences` namespace)
+1. Query memories tagged `shopping_preferences`
 2. Parse into the fields listed above
 3. Write the snapshot into the **"Standing preferences snapshot"** section of `spec.md`
-4. Report to the user what was loaded: "Loaded preferences from Mem0 — country: X, markup threshold: Y%, etc."
+4. Report to the user what was loaded: "Loaded preferences from memory — country: X, markup threshold: Y%, etc."
 
-### Typical Mem0 MCP tool calls
+### Tool calls
 
-Depending on which Mem0 MCP server is installed, the tool names vary. Common ones:
-
-- `mcp__mem0__search_memory` — query with `"shopping preferences"` or similar
-- `mcp__mem0__list_memories` — filter by tag / category
-- `mcp__mem0__get_memory` — by ID
-
-Use whichever read tool the installed Mem0 server exposes.
+- `mcp__gateway__memory__recall` — `query: "shopping preferences"`, `namespaces: ["personal"]` (or whichever namespace `/save-preferences` used)
+- `mcp__gateway__memory__list_memories` — `namespace: "personal"`, then keep the records tagged `shopping_preferences`
 
 ## Fallback 1: local file
 
-If Mem0 MCP is not available, check `<plugin-data-dir>/shopping-preferences.md`. If present, read it and populate the snapshot section of `spec.md` from it.
+If the gateway `memory` tools don't resolve, check `<plugin-data-dir>/shopping-preferences.md`. If present, read it and populate the snapshot section of `spec.md` from it.
 
-Tell the user: "Mem0 MCP not detected. Loaded preferences from `<plugin-data-dir>/shopping-preferences.md` instead. Install Mem0 MCP for cross-device persistence."
+Tell the user: "Gateway memory server not available. Loaded preferences from `<plugin-data-dir>/shopping-preferences.md` instead (this machine only)."
 
 ## Fallback 2: prompt the user
 
@@ -66,4 +61,4 @@ If neither source is available:
 ## What NOT to do
 
 - **Do not write per-purchase information here.** Must-haves, hard nos for this purchase, budget for this purchase, timeline — those belong in `spec.md` via `/intake`.
-- **Do not update Mem0 from this command.** `/load-preferences` is read-only. Writes go through `/save-preferences`.
+- **Do not write to memory from this command.** `/load-preferences` is read-only. Writes go through `/save-preferences`.

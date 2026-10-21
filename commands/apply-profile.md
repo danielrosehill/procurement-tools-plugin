@@ -92,7 +92,7 @@ Report in 3–5 lines:
 
 No code change needed — `/research`, `/recommend`, and `/recompare` all read `spec.md` and will pick up the **Buyer profile** section automatically. But the user should know:
 
-> Profile applied. `/research` and `/recommend` will now weight the evaluation accordingly. Standing prefs from Mem0 still take precedence over profile suggestions; must-haves and hard nos in `spec.md` always win.
+> Profile applied. `/research` and `/recommend` will now weight the evaluation accordingly. Standing prefs from memory still take precedence over profile suggestions; must-haves and hard nos in `spec.md` always win.
 
 ## Interactive picker (when `/apply-profile` called with no argument)
 
@@ -100,18 +100,18 @@ Use `AskUserQuestion` with the 9 profiles as options + a "Combine two or more" o
 
 ## Using without standing preferences
 
-If the user has no Mem0 memory and no `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA` — see `/load-preferences`), a buyer profile is the fastest way to give the agent *some* shopping posture for this purchase. Flow:
+If the user has no standing preferences in memory and no `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA` — see `/load-preferences`), a buyer profile is the fastest way to give the agent *some* shopping posture for this purchase. Flow:
 
 1. `/intake` (fills in per-purchase fields — what you're buying, must-haves, hard nos, budget)
 2. `/apply-profile` (picks a named archetype as a shortcut for priorities + heuristics)
 3. `/research`
 4. `/recommend`
 
-This path is documented for users who don't want to set up Mem0 but do want more signal than raw `/intake` gives on its own.
+This path is documented for users who don't want to set up standing preferences but do want more signal than raw `/intake` gives on its own.
 
 ## What NOT to do
 
-- Don't write profile content into standing preferences / Mem0. Profiles are per-purchase biases; standing prefs are the user's permanent shopping personality.
+- Don't write profile content into standing preferences / memory. Profiles are per-purchase biases; standing prefs are the user's permanent shopping personality.
 - Don't overwrite must-haves, hard nos, budget, or other `spec.md` sections. The Buyer profile section is additive only.
 - Don't invent new profiles on the fly. If the user wants a custom archetype, help them edit `spec.md`'s priorities directly or add a new file under `buyer-profiles/`.
 - Don't treat profile typical-brands as prescriptive. They're examples of the archetype, not a shopping list.

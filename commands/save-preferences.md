@@ -1,6 +1,6 @@
 # Save Preferences — Persist Standing Shopping Preferences to Memory
 
-Run a one-time setup (or update) for the user's standing shopping preferences, and save them to memory (Mem0 MCP) so every future purchase workspace can `/load-preferences` them.
+Run a one-time setup (or update) for the user's standing shopping preferences, and save them to memory (the gateway `memory` server) so every future purchase workspace can `/load-preferences` them.
 
 ## When to run
 
@@ -39,14 +39,14 @@ Walk through these conversationally. Batch related questions. Offer sensible def
 
 - Email for PDF report delivery (optional but recommended)
 
-## Preferred storage: Mem0 MCP
+## Preferred storage: gateway `memory` server
 
-If Mem0 MCP is configured:
+If the gateway `memory` tools resolve (deferred — load `mcp__gateway__memory__remember` with `ToolSearch` first):
 
-1. Structure the answers as a small set of related memories, each tagged `shopping_preferences` (or stored under a dedicated namespace)
-2. Use the installed Mem0 server's write tool — commonly `mcp__mem0__add_memory` — to persist
-3. One memory per field, OR a single consolidated memory, depending on what the Mem0 server accepts cleanly
-4. Report: "Saved N memories to Mem0 under tag `shopping_preferences`."
+1. Structure the answers as a small set of related memories, each tagged `shopping_preferences`
+2. Persist each with `mcp__gateway__memory__remember` — `text`, `namespace: "personal"`, `tags: ["shopping_preferences"]`. If `remember` returns an existing near-duplicate, call `mcp__gateway__memory__update_memory` on its id instead
+3. One memory per field, OR a single consolidated memory
+4. Report: "Saved N memories to the `personal` namespace under tag `shopping_preferences`."
 
 ### Example memory content
 
@@ -63,10 +63,10 @@ Shopping preference (international shipping): [user's stance]
 
 ## Fallback: local file
 
-If Mem0 MCP is not available:
+If the gateway `memory` tools don't resolve:
 
 1. Write to `<plugin-data-dir>/shopping-preferences.md` (where `<plugin-data-dir>` is `$CLAUDE_USER_DATA/procurement-tools/` if set, else `$XDG_DATA_HOME/claude-plugins/procurement-tools/`, else `~/.local/share/claude-plugins/procurement-tools/` — see the `meta-tools:plugin-data-storage` canonical skill) as a structured markdown file
-2. Tell the user: "Saved locally. Install Mem0 MCP (`/plugin install ...`) for cross-device / cross-machine persistence."
+2. Tell the user: "Saved locally (this machine only)."
 
 ## Confirmation
 

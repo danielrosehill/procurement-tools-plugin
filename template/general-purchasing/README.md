@@ -9,16 +9,16 @@ A Claude Code workspace template for a **single purchasing decision**. One repo 
 
 ## Two-tier preferences model (+ optional buyer-profile bias)
 
-- **Standing preferences** (country, currency, trusted/avoided brands, markup ceiling, risk tolerance) live in **memory** via the [Mem0 MCP](https://mem0.ai). One-time setup, applied to every future purchase workspace.
+- **Standing preferences** (country, currency, trusted/avoided brands, markup ceiling, risk tolerance) live in **memory** (the `memory` server on the MCP gateway). One-time setup, applied to every future purchase workspace.
 - **Per-purchase spec** (`spec.md` at repo root) holds only this decision: what you're buying, must-haves, hard nos, budget, timeline, priorities.
-- **Buyer profiles** (`buyer-profiles/`) are optional named archetypes — BIFL, budget, minimalist, power-user, etc. — that the user can apply to this purchase via `/apply-profile`. Works as a fallback for users without Mem0, or as a shortcut for reframing a purchase. Combines dynamically (e.g. `bifl+power-user`).
+- **Buyer profiles** (`buyer-profiles/`) are optional named archetypes — BIFL, budget, minimalist, power-user, etc. — that the user can apply to this purchase via `/apply-profile`. Works as a fallback for users without standing preferences, or as a shortcut for reframing a purchase. Combines dynamically (e.g. `bifl+power-user`).
 
 This split is deliberate. Your preferences don't belong in each new repo — they belong in memory. Profiles are a lightweight way to add named bias on top without permanent commitments.
 
 ## The workflow
 
 ```
-/save-preferences   → one-time setup (or update) — writes standing prefs to Mem0
+/save-preferences   → one-time setup (or update) — writes standing prefs to memory
 /load-preferences   → pull standing prefs into this workspace
 /intake             → build spec.md (per-purchase only)
 /apply-profile      → (optional) bias toward a named buyer archetype
@@ -28,22 +28,16 @@ This split is deliberate. Your preferences don't belong in each new repo — the
 
 ## What makes this template useful
 
-- **Preferences persist across repos.** With Mem0 MCP, your standing prefs are loaded into every new purchase workspace — no re-interviewing yourself.
+- **Preferences persist across repos.** With the gateway memory server, your standing prefs are loaded into every new purchase workspace — no re-interviewing yourself.
 - **Must-haves and hard nos are distinct.** "Must have X" and "must not have Y" are different kinds of constraints; both disqualify, and the spec captures them separately.
 - **Single-use per purchase.** No nested `purchases/active/` folders — the repo itself is the purchase.
 - **Decisive PDF deliverable.** Top 3 ranked, clear #1 pick, spec-adherence matrices for must-haves and hard nos.
 
 ## Setup (first time only)
 
-### Option A — Recommended: Mem0 MCP
+### Option A — Recommended: gateway `memory` server
 
-Install a Mem0 MCP server. Example (the exact installation varies by Mem0 MCP implementation):
-
-```
-/plugin install mem0@...
-```
-
-Then in any purchasing template repo:
+Use the `memory` upstream on the MCP gateway (tools `mcp__gateway__memory__*`). Nothing to install — if the tools resolve, the commands use them. Then in any purchasing template repo:
 
 ```
 /save-preferences
@@ -53,7 +47,7 @@ Walk through standing prefs once. From then on, every new purchasing workspace a
 
 ### Option B — Local fallback
 
-Without Mem0 MCP, the commands save to `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA/procurement-tools/` — see the `meta-tools:plugin-data-storage` canonical skill) instead. Works within a single machine but doesn't sync. Install Mem0 MCP for cross-device persistence.
+Without the gateway memory server, the commands save to `<plugin-data-dir>/shopping-preferences.md` (resolved via `$CLAUDE_USER_DATA/procurement-tools/` — see the `meta-tools:plugin-data-storage` canonical skill) instead. Works within a single machine but doesn't sync.
 
 ### Option C — No persistence
 
@@ -111,8 +105,8 @@ Core flow:
 
 | Command | Purpose |
 |---------|---------|
-| `/load-preferences` | Pull standing prefs from Mem0 (or fallback file) |
-| `/save-preferences` | Persist standing prefs to Mem0 — one-time or when updating |
+| `/load-preferences` | Pull standing prefs from memory (or fallback file) |
+| `/save-preferences` | Persist standing prefs to memory — one-time or when updating |
 | `/intake` | Populate `spec.md` — per-purchase only, must-haves and hard nos distinctly |
 | `/apply-profile` | Apply a buyer archetype (single or combined) to bias research. Optional. |
 | `/research` | Evaluate candidate products against the spec + standing prefs + profile |
@@ -133,7 +127,7 @@ Sub-agents (auto-invoked): `manufacturer-research`, `product-extraction`, `price
 
 ## Buyer profiles (optional)
 
-If you don't want to set up Mem0 yet, or you want a quick shortcut for the evaluation bias on this one purchase, the template ships nine named archetypes in `buyer-profiles/`:
+If you don't want to set up standing preferences yet, or you want a quick shortcut for the evaluation bias on this one purchase, the template ships nine named archetypes in `buyer-profiles/`:
 
 - **BIFL** — durability and brand reputation for long service life
 - **Budget** — best value per currency unit inside a tight budget
@@ -157,7 +151,7 @@ Combinations blend additively — first-listed profile dominates on conflicts, a
 
 ## What lives where
 
-### In Mem0 memory (standing preferences)
+### In memory (standing preferences)
 
 - Country, currency, VAT rate, VAT status
 - Trusted brands (general)
@@ -196,7 +190,7 @@ Combinations blend additively — first-listed profile dominates on conflicts, a
 # For each purchase
 2. gh repo create --template … my-new-purchase
 3. /intake
-   → /load-preferences runs automatically, loads from Mem0
+   → /load-preferences runs automatically, loads from memory
    → Describe what you're buying
    → Must-haves (hard positive requirements)
    → Hard nos (disqualifying characteristics)

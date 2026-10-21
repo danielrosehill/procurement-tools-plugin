@@ -119,7 +119,7 @@ correct and return the wrong thing.
 - `recompare` — re-run the shortlist against the current spec
 - `extract` — pull product data from screenshots, PDFs, and catalogs
 - `market-check` — local vs international price realism with import costs
-- `load-preferences` / `save-preferences` — standing preferences to/from Mem0
+- `load-preferences` / `save-preferences` — standing preferences to/from the gateway memory server
 - `apply-profile` — bias this purchase toward a named buyer archetype (BIFL, budget, minimalist, etc.)
 - `update-spec` — targeted edit to `spec.md`
 - `shop-setup` — configure the marketplaces, VPN egress and delivery addresses the price scanner uses
