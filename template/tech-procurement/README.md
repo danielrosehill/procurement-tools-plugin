@@ -3,7 +3,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Project-orange?style=for-the-badge&logo=anthropic)](https://github.com/anthropics/claude-code)
 [![Use this template](https://img.shields.io/badge/Use%20this%20template-238636?style=for-the-badge&logo=github)](https://github.com/danielrosehill/Claude-Rig-Planner/generate)
 [![Claude Code Projects](https://img.shields.io/badge/More%20Claude%20Code-Projects-blue?style=for-the-badge&logo=github)](https://github.com/danielrosehill/Claude-Code-Repos-Index)
-[![GitHub Index](https://img.shields.io/badge/GitHub-Master%20Index-lightgrey?style=for-the-badge&logo=github)](https://github.com/danielrosehill/Github-Master-Index)
+[![GitHub Index](https://img.shields.io/badge/GitHub-Master%20Index-lightgrey?style=for-the-badge&logo=github)](https://github.com/danielrosehill/Start-Here)
 
 A structured workspace template for planning computer hardware upgrades with Claude Code. Whether you're upgrading a gaming PC, workstation, homelab server, or managing multiple machines, this template provides an organized environment for AI-assisted hardware planning.
 
