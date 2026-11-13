@@ -79,7 +79,7 @@ deliberate, not an accident.
 
 **`__pycache__` and `.pytest_cache` are untracked but absent from `git status`.**
 Not a repo misconfiguration — there is no root `.gitignore` and none is needed.
-`git check-ignore -v` traces both to `/home/daniel/.gitignore_global:4`. The
+`git check-ignore -v` traces both to the global gitignore file (line 4). The
 same global file also ignores anything named `private` or `*private*/`, in every
 repo, which is why a gitignored scratch area needs no per-repo setup. Confirmed
 2026-09-02.
@@ -90,7 +90,7 @@ repo, which is why a gitignored scratch area needs no per-repo setup. Confirmed
 plugin's 14 skill descriptions are longer — `market-evaluator` is 631. That
 looks like the whole plugin should be missing from the substrate.
 
-It is not. `viking__find` over `viking://user/daniel/skills` returns
+It is not. `viking__find` over `viking://user/<user>/skills` returns
 `procurement-tools__evaluation-matrix` (527 chars) and
 `procurement-tools__spec-as-code` (573 chars) with their descriptions intact, so
 the limit is either unenforced on the live ingest path or was relaxed after that

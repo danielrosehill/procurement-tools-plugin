@@ -13,7 +13,7 @@ Set up this recommendation workspace for the user.
 Ask the user (use AskUserQuestion). Format selection is **multi-select** — the workspace can be specialised for one format or cover several:
 
 - **Formats:** any combination of: Movies, Netflix Series (and other streaming series), Podcasts, Books, YouTube Videos, Online Courses. Allow "Other (custom)" for things outside this list (music, games, papers, newsletters, etc.).
-- **Project name:** how they want to refer to this workspace (e.g. "Daniel's Podcast Discovery", "Family Movie Night", "CPD Library")
+- **Project name:** how they want to refer to this workspace (e.g. "Alex's Podcast Discovery", "Family Movie Night", "CPD Library")
 - **Recommendation cadence:** on-demand only / weekly digest / monthly digest
 - **Existing data to import:** none / OPML / CSV / JSON / web export — if yes, which command they'll use after onboarding
 
