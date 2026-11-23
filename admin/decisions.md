@@ -2,6 +2,34 @@
 
 Newest first. Each entry records what was decided, why, and what would reverse it.
 
+## 2026-11-23 — Reference media in the quote loop
+
+Sellers ask "can you send a photo?", and for made-to-order or "what would you
+recommend" enquiries a photo of the current setup gets a better answer than a
+description. So `check-replies` sends reference media when a seller asks for a
+photo, drawing or measurements (phrases in each locale's
+`media_request_phrases`), and `contact-sellers` attaches `first_contact` media
+where fit matters, not for plain stock or price checks.
+
+**Where it is declared:** a `## Reference media` table in the contact log
+(path, caption, `send_when`), not a separate file or workspace config. The
+skills already read the log on every run, the media is per purchase, and one
+file keeps the purchase's state together. The files are the user's and stay in
+the workspace, never in plugin data.
+
+**How it is sent:** `quote_loop.messaging.send_media` in the user overlay
+(staging command and its delete form, tool, request body). Most messaging
+APIs take a URL rather than a local path, so a short-lived staged copy is the
+general route; email uses an attachment. Missing route: describe in words.
+
+**Privacy:** photos may show a home interior, so only to sellers in an active
+enquiry, never groups or broadcasts, and staged copies are deleted after each
+send.
+
+**Would reverse it:** messaging tools accepting local file paths directly
+(drop the staging step), or media needed outside the quote loop (move the
+declaration to a workspace config).
+
 ## 2026-11-23 — Vendor identification as the quote loop's discovery step
 
 `vendor-identification` replaces the one-line research step in `quote-loop`.

@@ -104,6 +104,7 @@
     "new_sealed": "new and factory-sealed",
     "exclude": ["display", "open-box", "returned", "refurbished", "damaged packaging", "outlet"]
   },
+  "media_request_phrases": ["send a photo", "send me a photo", "send a picture", "can I see a photo", "photo of", "pictures", "drawing", "drawings", "plans", "sketch", "measurements", "dimensions", "what does it look like"],
   "templates": {
     "first_contact": [
       "Hello, I'm looking for <product> for <one-line use case>, budget around <amount>.\nWhat would you recommend? I'm considering <model>. Is it in stock, new and sealed?\nWhat would delivery to <city> cost, and how long? Thanks!",
@@ -111,6 +112,7 @@
     ],
     "chase": ["Hello again, just following up on my question about <model>. Thanks!"],
     "holding_reply": ["Thank you! I'll get back to you about ordering."],
+    "reference_media_caption": ["Here is the current setup, in case it helps you recommend: <short description>", "This is how it looks now: <short description>"],
     "notes": "Vary the wording for every seller."
   },
   "cultural_notes": [

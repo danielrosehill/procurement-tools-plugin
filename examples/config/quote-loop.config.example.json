@@ -7,7 +7,24 @@
       "app": "whatsapp",
       "call_via": null,
       "read_tool": "whatsapp_get_messages",
-      "send_tool": "whatsapp_send_message"
+      "send_tool": "whatsapp_send_message",
+      "send_media": {
+        "stage_command": "stage-file <file>",
+        "stage_output": "JSON with at least {url}; keep the other fields for unstage",
+        "unstage_command": "stage-file --rm <key>",
+        "tool": "whatsapp_post",
+        "call_via": null,
+        "method": "POST",
+        "path": "/api/sendImage",
+        "body": {
+          "session": "default",
+          "chatId": "<international digits>@c.us",
+          "file": { "mimetype": "image/jpeg", "filename": "<name>", "url": "<staged url>" },
+          "caption": "<caption from the reference media table>",
+          "reply_to": "<seller message id, when answering a request>"
+        },
+        "notes": "chatId is the real chat id, not an alias. Say in one line that the file leaves the machine before staging. Unstage after every send."
+      }
     },
     "email": {
       "account": "personal",

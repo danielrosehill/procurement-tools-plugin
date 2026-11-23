@@ -29,6 +29,14 @@ section `quote_loop` (schema in the README). Without it the loop still runs:
 drafts instead of sends, the user forwards replies, defaults for constraints.
 Say once which parts are degraded.
 
+**Reference media** (optional): photos, drawings or measurements of the user's
+setup, declared in the contact log's `## Reference media` table (path, caption,
+`send_when`: `on_request` / `first_contact`). `contact-sellers` attaches
+`first_contact` ones for made-to-order, workshop or "recommend me" enquiries;
+`check-replies` sends `on_request` ones when a seller asks for a photo. Sending
+needs `quote_loop.messaging.send_media` in the overlay; without it the setup is
+described in words. Offer once to add a photo when the enquiry is about fit.
+
 Record the purchase's constraints (reputable only, new only, excluded sellers)
 in the workspace's `CLAUDE.md` or the log header, so every later session and
 scheduled check applies the same ones.
@@ -87,5 +95,7 @@ workspace. Nothing in plugin data.
 
 - Sends messages from the user's accounts through `contact-sellers` and
   `check-replies`; their approval rules apply.
+- Reference photos may show a home interior: active-enquiry sellers only,
+  never groups or broadcasts, staged copies deleted after sending.
 - Absorbs `israel-shopping:ask-store`: the Israeli message template, channel
   order and grading now live in `locales/israel.json` and these skills.

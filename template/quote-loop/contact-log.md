@@ -19,6 +19,14 @@ Part of the point of these enquiries is to find out **which sellers actually res
 
 Chase each seller once at most. One row per seller per channel. "Operator" names the company behind a storefront, so sister brands and shared operators are deduped.
 
+## Reference media
+
+<!-- Optional. Photos, drawings or measurements of the user's setup that help a seller recommend or quote. Files stay in this workspace; paths are relative to its root. send_when: on_request (a seller asks for a photo, drawing or measurements), first_contact (attach to the first message for made-to-order, workshop or "what would you recommend" enquiries), or both: "on_request, first_contact". Captions in the locale's language. Delete the rows, or leave the table empty, if there is nothing to send. Sent only to sellers in an active enquiry, never to groups or broadcasts. -->
+
+| Path | Caption | send_when |
+|---|---|---|
+| <photos/current-setup.jpg> | <one line in the local language> | <on_request, first_contact> |
+
 ## Best offer
 
 <!-- One line, updated whenever the ranking changes: seller, product, total delivered price, condition, lead time, what is still unconfirmed. -->

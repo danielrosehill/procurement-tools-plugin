@@ -1,6 +1,6 @@
 ---
 name: check-replies
-description: Check WhatsApp, email and voicemail for seller replies in one pass, answer questions, chase once, grade sellers and update the log
+description: Check WhatsApp, email and voicemail for seller replies, answer questions, send a photo when asked, chase once, grade and log
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(cat *), Bash(date *), Bash(TZ=*), Bash(git *)
 ---
 
@@ -18,14 +18,15 @@ thread ID, is the contact log (default `docs/sellers-contacted.md`, or
 ## User overlay
 
 Read `${CLAUDE_USER_DATA:-${XDG_DATA_HOME:-$HOME/.local/share}/claude-plugins}/procurement-tools/config.json`,
-section `quote_loop`: `messaging.read_tool` / `send_tool`, `email.search_tool` /
+section `quote_loop`: `messaging.read_tool` / `send_tool` / `send_media`, `email.search_tool` /
 `thread_tool` / `send_tool`, `voicemail.email_query`, `callback_phone`,
 `default_locale`, and `call_via` where a tool is reached through a proxy.
 
 Missing pieces degrade, they don't stop the check:
 - no messaging tool: ask the user to paste or screenshot new chats;
 - no email tools: ask the user to forward replies;
-- no `voicemail` block: skip voicemail and say it is not configured.
+- no `voicemail` block: skip voicemail and say it is not configured;
+- no `messaging.send_media`: answer a photo request in words (step 2).
 
 Say which channels were checked and which were not.
 
@@ -63,6 +64,17 @@ Convert every timestamp to the locale's timezone (`TZ=<tz> date -d @<epoch>`).
 - **Answer sellers' questions from the purchase spec** (dimensions, load, fit,
   delivery city, colour, quantity). If the spec doesn't answer it, the
   question goes to the user.
+- **A seller asks for a photo, picture, drawing or measurements** (the
+  locale's `media_request_phrases`, e.g. "send a photo", "תשלח תמונה",
+  "תמונות / תוכניות / מידות"): send the matching entries from the contact
+  log's `## Reference media` table whose `send_when` includes `on_request`, as
+  a quoted reply to the request (`reply_to` the seller's message ID), with
+  the entry's caption. Use the route in `contact-sellers` "Reference media":
+  one line saying the file is leaving the machine, stage, send, unstage.
+  Log the file and the returned message ID in the seller's row. Drawings or
+  measurements not in the table go to the user. No table or no
+  `send_media`: describe the setup in words from the spec and tell the user.
+  Only to a seller in an active enquiry, never to a group or broadcast.
 - Ask the follow-ups needed to confirm **price, stock, condition (new and
   sealed), fit and delivery** in writing.
 - Reply in the same thread: messaging app with a reply-to on the message being
@@ -114,5 +126,7 @@ the contact log in the user's purchase workspace.
 ## Notes
 
 - Sends replies from the user's own messaging and email accounts.
+- Sending reference media uploads a staged copy off the machine; it is
+  deleted after the send.
 - An automated bot reply (instant, generic) is logged as a bot; grade the human
   follow-up, not the bot.
