@@ -1,0 +1,91 @@
+{
+  "locale": "israel",
+  "description": "Quote-loop profile for buying from Israeli sellers. Absorbed from israel-shopping:ask-store (2026-11-23).",
+  "country_code": "IL",
+  "timezone": "Asia/Jerusalem",
+  "currency": "ILS",
+  "language": {
+    "code": "he",
+    "name": "Hebrew",
+    "register": "informal-polite (שלום / היי, תודה)",
+    "notes": "Model names, part numbers and brand names stay in Latin script. 2-4 lines per message; no long specs, no English paragraphs."
+  },
+  "phone": {
+    "international_prefix": "972",
+    "to_international": "Drop the leading 0 and prefix 972: 052-123-4567 -> 972521234567.",
+    "mobile_prefixes": ["05"],
+    "notes": "A 05x mobile on a contact page is usually WhatsApp. Some stores run WhatsApp Business on a 02/03/04/08/09 landline; the site's WhatsApp button shows which."
+  },
+  "channel_order": [
+    {
+      "channel": "whatsapp",
+      "find": [
+        "a wa.me/<number> or api.whatsapp.com/send?phone=<number> link on the product or contact page (take only the digits, not the prefilled text)",
+        "a 05x mobile number on the contact page",
+        "a WhatsApp Business landline shown by the site's WhatsApp button"
+      ]
+    },
+    {"channel": "email", "find": ["the contact page", "the footer", "the terms / privacy page (often has the company email and ח.פ.)"]},
+    {"channel": "site_chat", "find": ["chat widget on the site"]},
+    {"channel": "phone", "find": ["contact page"], "notes": "Give the user a call script; the agent does not phone."}
+  ],
+  "business_hours": {
+    "days": {
+      "sun": ["09:00", "17:00"],
+      "mon": ["09:00", "17:00"],
+      "tue": ["09:00", "17:00"],
+      "wed": ["09:00", "17:00"],
+      "thu": ["09:00", "17:00"],
+      "fri": ["09:00", "13:00"],
+      "sat": null
+    },
+    "notes": "Approximate. Friday is mornings only, Saturday (Shabbat) closed. Expect closures on Jewish holidays and their eves.",
+    "chase_after_business_days": 2
+  },
+  "search": {
+    "first_query": "<item or model> site:il מחיר",
+    "fallback_terms": ["במלאי", "יבואן"],
+    "notes": "If results are thin, swap מחיר for במלאי (in stock) or יבואן (importer). The built-in web search is US-biased and often ignores site:, so run these in Google through a real browser or a search API that honours site:. For a full product search hand off to israel-shopping:find-product."
+  },
+  "reputation_skill": "israel-shopping:store-reputation",
+  "reputable_signals": [
+    "manufacturer or official Israeli importer (יבואן רשמי)",
+    "recognised retail chain",
+    "specialist with a real showroom or workshop and a track record in the category",
+    "company number (ח.פ.) and a physical address on the site",
+    "reviews beyond the price-comparison site (e.g. Google Maps)"
+  ],
+  "aggregator_signals": [
+    "Zap storefront selling many unrelated categories",
+    "no ח.פ. or address on the site",
+    "listing text identical to another storefront (same operator)",
+    "adjacent store IDs on the same platform with the same wording"
+  ],
+  "condition_terms": {
+    "new_sealed": "חדש באריזה סגורה",
+    "exclude": ["תצוגה", "אאוטלט", "מציאון", "החזרה", "מחודש", "אריזה פגומה"]
+  },
+  "templates": {
+    "first_contact": [
+      "שלום, אני מחפש/ת <מוצר> ל<שימוש בשורה אחת>, תקציב בערך <₪>.\nמה הייתם ממליצים? שוקל/ת את <דגם>, יש אצלכם במלאי?\nחדש באריזה סגורה? כמה עולה משלוח ל<עיר> ותוך כמה ימים?\nתודה!",
+      "היי, מתעניין/ת ב<דגם> (או משהו דומה) ל<שימוש>. מה הייתם ממליצים?\nיש במלאי, חדש ולא תצוגה? מחיר כולל משלוח ל<עיר>?\nאפשר לחזור אליי ל<טלפון>. תודה!",
+      "ערב טוב, אני צריך/ה <מוצר> ש<דרישת התאמה>. <דגם> מתאים לזה לדעתכם?\nאם כן, יש במלאי וכמה זמן משלוח ל<עיר>? מדובר בחדש באריזה?\nתודה רבה"
+    ],
+    "chase": [
+      "שלום שוב, רציתי לבדוק לגבי ההודעה הקודמת על <דגם>. תודה!",
+      "היי, מחכה לתשובה לגבי <דגם> (מלאי ומחיר). תודה!"
+    ],
+    "holding_reply": [
+      "תודה רבה! אחזור אליכם לגבי ההזמנה.",
+      "מעולה, תודה. אעדכן בהקדם."
+    ],
+    "notes": "Templates are starting points. Vary the wording for every seller: identical bulk messages to strangers get WhatsApp accounts banned."
+  },
+  "cultural_notes": [
+    "Returns are hard in practice, whatever the law allows: expect in-person returns, credit notes or restocking deductions rather than a smooth refund. Treat an Israeli purchase as final unless the seller's return terms are known and good.",
+    "So a seller's pre-sale answer previews its after-sale service: grade responsiveness and straightness, not only price.",
+    "Domestic delivery is often unreliable: missed windows, rescheduled drop-offs, 'in stock' listings that are not on the shelf. Get stock and delivery time confirmed in writing.",
+    "Prefer the option that is right first time over the cheapest one that might be. Do not recommend a 'buy it, return it if it doesn't work' gamble from an Israeli store.",
+    "Staff often reply from a personal Gmail or WhatsApp number rather than the store's address."
+  ]
+}

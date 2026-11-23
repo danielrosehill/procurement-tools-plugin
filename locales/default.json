@@ -1,0 +1,74 @@
+{
+  "locale": "default",
+  "description": "Fallback quote-loop profile when no locale-specific profile exists. Copy to locales/<country>.json and fill in to add a locale.",
+  "country_code": null,
+  "timezone": null,
+  "currency": null,
+  "language": {
+    "code": "en",
+    "name": "English",
+    "register": "short, polite, plain",
+    "notes": "Use the seller's language when it is known. 2-5 lines per message."
+  },
+  "phone": {
+    "international_prefix": null,
+    "to_international": "Use E.164 digits without '+' for WhatsApp chat IDs.",
+    "mobile_prefixes": [],
+    "notes": null
+  },
+  "channel_order": [
+    {"channel": "email", "find": ["contact page", "footer", "terms / imprint page"]},
+    {"channel": "site_chat", "find": ["chat widget or contact form on the site"]},
+    {"channel": "whatsapp", "find": ["a wa.me/<number> link on the site"]},
+    {"channel": "phone", "find": ["contact page"], "notes": "Give the user a call script; the agent does not phone."}
+  ],
+  "business_hours": {
+    "days": {
+      "mon": ["09:00", "17:00"],
+      "tue": ["09:00", "17:00"],
+      "wed": ["09:00", "17:00"],
+      "thu": ["09:00", "17:00"],
+      "fri": ["09:00", "17:00"],
+      "sat": null,
+      "sun": null
+    },
+    "notes": "Assumed Mon-Fri office hours in the seller's timezone.",
+    "chase_after_business_days": 2
+  },
+  "search": {
+    "first_query": "<item or model> price",
+    "fallback_terms": ["in stock", "authorised dealer", "official distributor"],
+    "notes": "Add a country-code site: filter when the seller country is known."
+  },
+  "reputation_skill": null,
+  "reputable_signals": [
+    "manufacturer or official distributor",
+    "recognised retail chain",
+    "established specialist in the category",
+    "company registration number and physical address on the site",
+    "independent reviews (e.g. Google Maps, Trustpilot)"
+  ],
+  "aggregator_signals": [
+    "storefront selling many unrelated categories",
+    "no company details or address",
+    "listing text identical to another storefront",
+    "ships from a third country with long lead times (dropshipping)"
+  ],
+  "condition_terms": {
+    "new_sealed": "new and factory-sealed",
+    "exclude": ["display", "open-box", "returned", "refurbished", "damaged packaging", "outlet"]
+  },
+  "templates": {
+    "first_contact": [
+      "Hello, I'm looking for <product> for <one-line use case>, budget around <amount>.\nWhat would you recommend? I'm considering <model>. Is it in stock, new and sealed?\nWhat would delivery to <city> cost, and how long? Thanks!",
+      "Hi, is <model> (or something similar for <use>) in stock? New, not display stock?\nPrice including delivery to <city>, please. Thank you."
+    ],
+    "chase": ["Hello again, just following up on my question about <model>. Thanks!"],
+    "holding_reply": ["Thank you! I'll get back to you about ordering."],
+    "notes": "Vary the wording for every seller."
+  },
+  "cultural_notes": [
+    "A seller's pre-sale answer previews its after-sale service: grade responsiveness and straightness, not only price.",
+    "Check the seller's return terms before treating a purchase as reversible."
+  ]
+}

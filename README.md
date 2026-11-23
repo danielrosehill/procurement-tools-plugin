@@ -168,6 +168,11 @@ All model-invocable, so a subagent can reach for them mid-task.
 - **`bom-build`** — a shopping list written as requirements rather than products.
 - **`rfq-package`** — a BOM projected onto a supplier request.
 
+**Quote loop** — getting real quotes from sellers who have to be asked. See [Quote loop](#quote-loop).
+
+- **`quote-loop`** — the orchestrator: research, shortlist, contact, check replies, follow up, compare, repeat until there's a good option.
+- **`seller-shortlist`**, **`contact-sellers`**, **`check-replies`**, **`quote-compare`** — its steps, each usable alone.
+
 **Everything else:**
 
 - **`price-scan`** — model-invocable. Scans a shortlist of product URLs for current price, stock, shipping and landed cost across your configured marketplaces, from your own machine with the VPN exit set to the country each shop requires. Runs inside any purchase-research repo and writes results there. See [Price scanning](#price-scanning).
@@ -347,6 +352,46 @@ Amazon and Newegg both sit behind bot protection, so `blocked` is a routine outc
 Exit codes: `0` everything priced, `1` needs a browser pass (report still written), `2` config or watchlist missing, `3` PyYAML missing.
 
 Tests: `python3 tests/test_price_scan.py` (offline, synthetic fixtures).
+
+## Quote loop
+
+For purchases where the real price, stock, condition and delivery are only known once a seller confirms them in writing: local shops, importers, specialists. It also screens the sellers: how a seller answers a pre-sale question is a cheap preview of its after-sale service, which matters most where returns are hard.
+
+It absorbs `israel-shopping`'s `ask-store` skill: the Hebrew template, channel order and grading rubric now live here, in `locales/israel.json` and the skills below.
+
+| Skill | Does |
+|---|---|
+| `quote-loop` | Orchestrator. Research → shortlist (dedupe) → contact → check replies → follow up → compare, repeated until there's a good option the user approves. Updates the user only when a seller answers or the best option changes. Stops when the user picks; ordering is always theirs. |
+| `seller-shortlist` | Reputable sellers only (manufacturer or official importer, chains, established specialists with company details); drops aggregator storefronts, dropshippers, used-only sellers and the user's exclusions; dedupes against the contact log by operator, so sister brands count once; hands off to the locale's reputation skill. |
+| `contact-sellers` | First contact in the local language: recommendation, then stock, price, delivery, condition (new and sealed) and fit. Varied wording per seller (bulk copy-paste gets WhatsApp accounts banned). Logged at send time with the message or thread ID. Drafts for approval unless the user asked or the overlay says otherwise. |
+| `check-replies` | One pass over every channel: messaging app, email threads plus replies from new addresses, voicemail-to-email. Answers from the spec, never commits to an order. Chases once. Grades responsiveness, knowledge 1–5, straightness, tone, verdict. |
+| `quote-compare` | Ranks confirmed offers on total delivered price, warranty, condition, lead time, seller verdict and constraint fit; names the best option and what's still unconfirmed. |
+
+**Locale profiles** (`locales/<locale>.json`): channel order, language, business days and hours, search idiom, reputation skill, message templates and cultural notes. Ships `israel` (WhatsApp first, Hebrew, Sun–Thu plus Friday mornings, `<item> site:il מחיר`, `israel-shopping:store-reputation`) and `default`. Add a locale by copying `default.json`.
+
+**Contact log**: [`template/quote-loop/contact-log.md`](template/quote-loop/contact-log.md), copied to `docs/sellers-contacted.md` in the purchase workspace. The log is the user's data and lives with the purchase, not in plugin data.
+
+### User overlay
+
+Private settings live outside any repo, at
+`${CLAUDE_USER_DATA:-${XDG_DATA_HOME:-$HOME/.local/share}/claude-plugins}/procurement-tools/config.json`, in a `quote_loop` section. Every key is optional; without the file the skills draft instead of sending, ask you to forward replies, and use the default constraints. Example: [`examples/config/quote-loop.config.example.json`](examples/config/quote-loop.config.example.json).
+
+| Key | Type | Meaning |
+|---|---|---|
+| `callback_phone` | string | Number given to sellers for callbacks. |
+| `default_locale` | string | Locale profile name (`israel`, `default`, ...). |
+| `contact_log_path` | string | Log path relative to the purchase workspace. Default `docs/sellers-contacted.md`. |
+| `messaging.app` | string | e.g. `whatsapp`. |
+| `messaging.read_tool` / `messaging.send_tool` | string | Your messaging tools, e.g. a WAHA-backed WhatsApp MCP's get-messages and send-message tools. |
+| `messaging.call_via` | string or null | Proxy tool when the tools are reached indirectly (e.g. an MCP gateway's `call_tool`). |
+| `email.account` | string | Label for the mailbox used. |
+| `email.search_tool` / `email.thread_tool` / `email.send_tool` | string | Your email search, batch thread read and send tools (e.g. a Gmail MCP). |
+| `email.call_via` | string or null | As `messaging.call_via`. |
+| `voicemail.email_query` | string | Mail search query that finds voicemail-to-email messages. Omit the block if you have none. |
+| `excluded_sellers` | string[] | Sellers never to shortlist (matched on brand, operator and domain). |
+| `default_constraints.reputable_only` | bool | Default `true`. |
+| `default_constraints.new_only` | bool | Default `true`: new and sealed only, no display or outlet stock. |
+| `send_without_review` | bool | Default `false`: show drafts first. `true`: asking for contact or a reply check is the approval. |
 
 ## Pattern
 

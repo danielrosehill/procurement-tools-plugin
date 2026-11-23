@@ -1,0 +1,30 @@
+{
+  "quote_loop": {
+    "callback_phone": "+1-555-0100",
+    "default_locale": "default",
+    "contact_log_path": "docs/sellers-contacted.md",
+    "messaging": {
+      "app": "whatsapp",
+      "call_via": null,
+      "read_tool": "whatsapp_get_messages",
+      "send_tool": "whatsapp_send_message"
+    },
+    "email": {
+      "account": "personal",
+      "call_via": null,
+      "search_tool": "gmail_search_messages",
+      "thread_tool": "gmail_get_threads",
+      "send_tool": "gmail_send_message"
+    },
+    "voicemail": {
+      "email_query": "newer_than:3d subject:\"Voicemail\"",
+      "notes": "Voicemail-to-email source. Omit the whole block if you have none."
+    },
+    "excluded_sellers": [],
+    "default_constraints": {
+      "reputable_only": true,
+      "new_only": true
+    },
+    "send_without_review": false
+  }
+}

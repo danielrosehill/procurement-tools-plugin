@@ -2,6 +2,23 @@
 
 Newest first. Each entry records what was decided, why, and what would reverse it.
 
+## 2026-11-23 — Quote loop: locale as data, private details in the overlay
+
+The seller quote loop (`quote-loop`, `seller-shortlist`, `contact-sellers`,
+`check-replies`, `quote-compare`) was generalised from a working purchase
+workspace and absorbs `israel-shopping:ask-store`. Everything country-specific
+(channel order, language, business hours, search idiom, reputation skill,
+templates, cultural notes) is a JSON profile in `locales/`, so a new country is
+a data file, not a skill fork. Tool names, callback number, exclusions and the
+send-without-review switch live in the user overlay `config.json` under
+`quote_loop`, because they are the user's, and the skills degrade to drafts and
+forwarded replies without them. The contact log stays in the purchase workspace:
+it is the user's record of a purchase, not plugin state.
+
+**Would reverse it:** a second locale needing behaviour a profile can't express
+(e.g. a channel with a different reply model), at which point that locale gets
+its own skill and the profile points to it.
+
 ## 2026-09-02 — Workspace identity lives in a manifest file, not a directory naming convention
 
 Every workspace gets `procurement.json` at its root with a stable
