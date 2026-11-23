@@ -2,6 +2,23 @@
 
 Newest first. Each entry records what was decided, why, and what would reverse it.
 
+## 2026-11-23 — Vendor identification as the quote loop's discovery step
+
+`vendor-identification` replaces the one-line research step in `quote-loop`.
+It is vendor-first ("who could supply this") rather than product-first ("where
+is this model sold"), because the purchases the quote loop exists for often
+have no retail listing: made-to-order work and local workshops. It links to
+`israel-shopping:find-product` and `store-reputation` instead of duplicating
+them. Channels (query idiom and commercial-word ladder, aggregators, chains,
+directories, trade nouns, importer lookup, warnings) are a `vendor_identification`
+block in each locale profile, consistent with the locale-as-data decision
+below. It reads the contact log before searching so known operators never
+reappear as "new" candidates; `seller-shortlist` still owns filtering and the
+final dedupe.
+
+**Would reverse it:** the locale's product finder gaining vendor-first and
+trade/workshop search, at which point this skill becomes a thin router to it.
+
 ## 2026-11-23 — Quote loop: locale as data, private details in the overlay
 
 The seller quote loop (`quote-loop`, `seller-shortlist`, `contact-sellers`,

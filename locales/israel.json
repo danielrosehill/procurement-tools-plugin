@@ -47,6 +47,95 @@
     "fallback_terms": ["במלאי", "יבואן"],
     "notes": "If results are thin, swap מחיר for במלאי (in stock) or יבואן (importer). The built-in web search is US-biased and often ignores site:, so run these in Google through a real browser or a search API that honours site:. For a full product search hand off to israel-shopping:find-product."
   },
+  "vendor_identification": {
+    "notes": "Channels for the vendor-identification skill. Product-first questions (a known model: where is it sold, at what price) go to israel-shopping:find-product instead.",
+    "web_search": {
+      "first_query": "<item or category in Hebrew> site:il מחיר",
+      "commercial_word_ladder": [
+        "מחיר",
+        "במלאי",
+        "יבואן",
+        "ייצור",
+        "קנייה"
+      ],
+      "ladder_notes": "Always start with מחיר (price). If results are thin, swap it in order: במלאי (in stock), יבואן (importer), ייצור (manufacture, for made-to-order), קנייה (buy).",
+      "engine_notes": "Some agents' built-in web search is US-biased and ignores site:. Run the query in Google in a real browser, or use a semantic search API such as Exa, describing the page wanted (e.g. 'Israeli business that makes custom steel furniture frames')."
+    },
+    "aggregators": [
+      {
+        "name": "Zap",
+        "url": "https://www.zap.co.il",
+        "notes": "Model pages list every vendor with official-importer and warranty flags; store cards (clientcard) carry reviews."
+      },
+      {
+        "name": "Wisebuy",
+        "url": "https://www.wisebuy.co.il",
+        "notes": "Mirrors Zap reviews; a second view of the same vendors."
+      }
+    ],
+    "chains": [
+      {
+        "name": "KSP",
+        "url": "https://ksp.co.il",
+        "notes": "Per-branch stock: israel-shopping:ksp-branch-stock."
+      },
+      {
+        "name": "Ivory",
+        "url": "https://www.ivory.co.il",
+        "notes": "Per-branch stock: israel-shopping:ivory-branch-stock."
+      },
+      {
+        "name": "Bug",
+        "url": "https://www.bug.co.il"
+      },
+      {
+        "name": "Office Depot Israel",
+        "url": "https://www.officedepot.co.il"
+      },
+      {
+        "name": "Home Center",
+        "url": "https://www.homecenter.co.il"
+      },
+      {
+        "name": "Ace",
+        "url": "https://www.ace.co.il"
+      }
+    ],
+    "directories": [
+      {
+        "name": "Dapei Zahav",
+        "url": "https://www.d.co.il",
+        "notes": "Search by trade or category noun plus city."
+      },
+      {
+        "name": "b144",
+        "url": "https://www.b144.co.il",
+        "notes": "Bezeq directory; same query shape."
+      }
+    ],
+    "maps": {
+      "service": "Google Maps",
+      "query": "<Hebrew trade or category noun> <city>",
+      "notes": "For showrooms and workshops. Headless fetches return no ratings; use a real browser or a semantic search API."
+    },
+    "trade_nouns": {
+      "מסגריה": "metal workshop",
+      "נגריה": "carpentry",
+      "ריהוט משרדי": "office furniture",
+      "רפד": "upholsterer",
+      "זגגות": "glazier",
+      "שלטים": "sign maker"
+    },
+    "importer_lookup": {
+      "query": "<brand> יבואן רשמי",
+      "notes": "The official importer (יבואן רשמי) often lists its authorised dealers; Zap model pages also flag importer-warranty offers."
+    },
+    "warnings": [
+      "Many Zap storefronts are generic multi-category dropshippers. Flag them so seller-shortlist excludes them.",
+      "Landline numbers (02, 03, 04, 08, 09, 072, 073, 077) often have no WhatsApp. Mark them 'call or email', not 'WhatsApp', unless the site's WhatsApp button shows the number."
+    ],
+    "reputation_skill": "israel-shopping:store-reputation"
+  },
   "reputation_skill": "israel-shopping:store-reputation",
   "reputable_signals": [
     "manufacturer or official Israeli importer (יבואן רשמי)",

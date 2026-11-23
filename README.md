@@ -171,6 +171,7 @@ All model-invocable, so a subagent can reach for them mid-task.
 **Quote loop** — getting real quotes from sellers who have to be asked. See [Quote loop](#quote-loop).
 
 - **`quote-loop`** — the orchestrator: research, shortlist, contact, check replies, follow up, compare, repeat until there's a good option.
+- **`vendor-identification`** — the discovery step: who could supply this need (shops, importers, chains, specialists, local workshops for made-to-order jobs), as a ranked candidate table.
 - **`seller-shortlist`**, **`contact-sellers`**, **`check-replies`**, **`quote-compare`** — its steps, each usable alone.
 
 **Everything else:**
@@ -361,13 +362,14 @@ It absorbs `israel-shopping`'s `ask-store` skill: the Hebrew template, channel o
 
 | Skill | Does |
 |---|---|
-| `quote-loop` | Orchestrator. Research → shortlist (dedupe) → contact → check replies → follow up → compare, repeated until there's a good option the user approves. Updates the user only when a seller answers or the best option changes. Stops when the user picks; ordering is always theirs. |
+| `quote-loop` | Orchestrator. Research (`vendor-identification`) → shortlist (dedupe) → contact → check replies → follow up → compare, repeated until there's a good option the user approves. Updates the user only when a seller answers or the best option changes. Stops when the user picks; ordering is always theirs. |
+| `vendor-identification` | Discovery, vendor-first: frames the need as local search vocabulary (category nouns, brands, the trade that makes it), excludes everyone in the contact log, then fans out in parallel over the locale's channels (site-restricted web search with a commercial word, aggregators and chains, business directories, brand → official importer, maps for showrooms and workshops). Returns a ranked candidate table with reputation signals, contacts and provenance for `seller-shortlist`. For a known model's retail listings, the locale's product finder (Israel: `israel-shopping:find-product`) is the better tool. |
 | `seller-shortlist` | Reputable sellers only (manufacturer or official importer, chains, established specialists with company details); drops aggregator storefronts, dropshippers, used-only sellers and the user's exclusions; dedupes against the contact log by operator, so sister brands count once; hands off to the locale's reputation skill. |
 | `contact-sellers` | First contact in the local language: recommendation, then stock, price, delivery, condition (new and sealed) and fit. Varied wording per seller (bulk copy-paste gets WhatsApp accounts banned). Logged at send time with the message or thread ID. Drafts for approval unless the user asked or the overlay says otherwise. |
 | `check-replies` | One pass over every channel: messaging app, email threads plus replies from new addresses, voicemail-to-email. Answers from the spec, never commits to an order. Chases once. Grades responsiveness, knowledge 1–5, straightness, tone, verdict. |
 | `quote-compare` | Ranks confirmed offers on total delivered price, warranty, condition, lead time, seller verdict and constraint fit; names the best option and what's still unconfirmed. |
 
-**Locale profiles** (`locales/<locale>.json`): channel order, language, business days and hours, search idiom, reputation skill, message templates and cultural notes. Ships `israel` (WhatsApp first, Hebrew, Sun–Thu plus Friday mornings, `<item> site:il מחיר`, `israel-shopping:store-reputation`) and `default`. Add a locale by copying `default.json`.
+**Locale profiles** (`locales/<locale>.json`): channel order, language, business days and hours, search idiom, vendor-discovery channels (`vendor_identification`: query and commercial-word ladder, aggregators, chains, directories, trade nouns, importer lookup, warnings), reputation skill, message templates and cultural notes. Ships `israel` (WhatsApp first, Hebrew, Sun–Thu plus Friday mornings, `<item> site:il מחיר`, `israel-shopping:store-reputation`) and `default`. Add a locale by copying `default.json`.
 
 **Contact log**: [`template/quote-loop/contact-log.md`](template/quote-loop/contact-log.md), copied to `docs/sellers-contacted.md` in the purchase workspace. The log is the user's data and lives with the purchase, not in plugin data.
 

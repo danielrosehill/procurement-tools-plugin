@@ -40,6 +40,52 @@
     "fallback_terms": ["in stock", "authorised dealer", "official distributor"],
     "notes": "Add a country-code site: filter when the seller country is known."
   },
+  "vendor_identification": {
+    "notes": "Generic channels for the vendor-identification skill. Fill in the country-specific names when adding a locale.",
+    "web_search": {
+      "first_query": "<item or category> site:<country TLD> price",
+      "commercial_word_ladder": [
+        "price",
+        "in stock",
+        "distributor",
+        "manufacturer",
+        "buy"
+      ],
+      "ladder_notes": "Swap the commercial word in this order when results are thin; use 'manufacturer' or 'made to order' for custom jobs. Use the local language when it is not English.",
+      "engine_notes": "If the built-in web search ignores site: or is region-biased, run the query in Google in a real browser or a semantic search API."
+    },
+    "aggregators": [
+      {
+        "name": "<main local price aggregator, if known>",
+        "notes": "Model pages listing every vendor; e.g. idealo (DE), PriceRunner (UK, Nordics), Google Shopping as a fallback."
+      }
+    ],
+    "chains": [],
+    "directories": [
+      {
+        "name": "Yelp-style local directories",
+        "notes": "Yelp, the national yellow pages, trade association member lists; query with the trade noun plus city."
+      }
+    ],
+    "maps": {
+      "service": "Google Maps",
+      "query": "<trade or category noun> <city>",
+      "notes": "For showrooms and workshops near the user's city."
+    },
+    "trade_nouns": {
+      "metal fabricator": "metal workshop",
+      "joinery": "carpentry",
+      "office furniture dealer": "office furniture"
+    },
+    "importer_lookup": {
+      "query": "<brand> distributor <country>",
+      "notes": "Or the brand's 'where to buy' / dealer locator page."
+    },
+    "warnings": [
+      "Flag multi-category marketplace storefronts and dropshippers for seller-shortlist to exclude."
+    ],
+    "reputation_skill": null
+  },
   "reputation_skill": null,
   "reputable_signals": [
     "manufacturer or official distributor",

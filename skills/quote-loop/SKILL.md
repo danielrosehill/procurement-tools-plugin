@@ -35,9 +35,12 @@ scheduled check applies the same ones.
 
 ## The loop
 
-1. **Research.** Find candidate sellers with the locale's search idiom (Israel:
-   `<item> site:il מחיר`, swapping מחיר for במלאי / יבואן if thin), plus
-   `price-scan` results or marketplace plugins (see `marketplace-handoff`).
+1. **Research:** `vendor-identification`. Frames the need as local search
+   vocabulary, excludes everyone already in the contact log, and fans out over
+   the locale's channels (site-restricted web search, aggregators, directories,
+   brand-to-importer lookup, maps for showrooms and workshops) into a ranked
+   candidate table. Add `price-scan` results or marketplace plugins (see
+   `marketplace-handoff`) when the exact model is known.
 2. **Shortlist and dedupe:** `seller-shortlist`. Reputable sellers only,
    condition filter, exclusions, one row per operator, nobody already
    contacted.
@@ -51,7 +54,8 @@ scheduled check applies the same ones.
    one confirmed offer might already be good enough.
 7. **Decide:** if there's a good option, put it to the user. If not (too few
    replies, all fail a constraint, prices out of budget), go back to step 1 for
-   more sellers, widening the search terms rather than re-contacting.
+   more sellers (`vendor-identification` with wider vocabulary), widening the
+   search terms rather than re-contacting.
 
 ## Updating the user
 

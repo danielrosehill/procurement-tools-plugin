@@ -6,8 +6,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, WebSearch, WebFetch, Bash(cat *), 
 
 # Seller shortlist
 
-Turns a pile of candidate sellers (from research, a price-comparison site, a
-`price-scan`, or names the user gives) into a short list of sellers worth
+Turns a pile of candidate sellers (normally the candidate table from
+`vendor-identification`; also a price-comparison site, a `price-scan`, or names
+the user gives) into a short list of sellers worth
 contacting, with the channel to reach each one. Step 2 of the `quote-loop`.
 
 The rule underneath: **a cheap price at a seller you would not buy from is not
@@ -16,6 +17,10 @@ an option.** Filter before contacting, not after the quotes come back.
 ## Inputs
 
 - Candidate sellers: name, site, and the product/price that surfaced them.
+  From `vendor-identification` they also carry type, reputation signals,
+  contacts, provenance (`vendor_page` or `snippet`) and warning flags (e.g. a
+  multi-category dropshipper storefront): treat a flagged row as an aggregator
+  under step 1, and confirm `snippet` contacts on the vendor's page in step 6.
 - The purchase workspace's contact log (default `docs/sellers-contacted.md`, or
   `quote_loop.contact_log_path` from the overlay). Create it from
   `${CLAUDE_PLUGIN_ROOT}/template/quote-loop/contact-log.md` if absent.
