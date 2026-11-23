@@ -132,7 +132,8 @@
     },
     "warnings": [
       "Many Zap storefronts are generic multi-category dropshippers. Flag them so seller-shortlist excludes them.",
-      "Landline numbers (02, 03, 04, 08, 09, 072, 073, 077) often have no WhatsApp. Mark them 'call or email', not 'WhatsApp', unless the site's WhatsApp button shows the number."
+      "Landline numbers (02, 03, 04, 08, 09, 072, 073, 077) often have no WhatsApp. Mark them 'call or email', not 'WhatsApp', unless the site's WhatsApp button shows the number.",
+      "KSP and Ivory items: run israel-shopping:ksp-branch-stock / ivory-branch-stock (by item id, e.g. --branch ירושלים) before contacting the store; stock differs by branch."
     ],
     "reputation_skill": "israel-shopping:store-reputation"
   },
