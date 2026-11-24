@@ -36,6 +36,7 @@ document, so a claim can always be traced back to where it came from.
 | --- | --- |
 | `spec-as-code` | The requirement as a versioned, machine-checkable artefact rather than prose that drifts |
 | `spec-sheet-retrieval` | The manufacturer's own datasheet, not a retailer's retyped summary of it |
+| `product-identifiers` | Which UPC, EAN, JAN and MPN belong to the product, starting from a trading name or description |
 | `part-number-equivalence` | Whether a part number sold in one region is the same thing as the one you specced |
 | `spec-variants` | Parallel either/or bars — a budget spec and a premium spec for one purchase, versioned independently |
 | `evaluation-matrix` | Candidate-by-requirement conformance, with unknowns recorded as unknown rather than guessed |
@@ -162,6 +163,7 @@ All model-invocable, so a subagent can reach for them mid-task.
 - **`spec-as-code`** — versioned `spec.yaml` with stable requirement ids.
 - **`spec-variants`** — parallel either/or bars for one purchase (`spec-budget.yaml`, `spec-premium.yaml`), each versioned on its own axis, with a generated diff of what actually differs. Not needed for the ordinary one-spec case.
 - **`spec-sheet-retrieval`** — the manufacturer's own documentation, with the document and revision behind every value.
+- **`product-identifiers`** — from a trading name or description to verified UPC, EAN, JAN and MPN, by variant and market.
 - **`part-number-equivalence`** — which part numbers name the same product across regions and brands, and which look identical and are not.
 - **`evaluation-matrix`** — conformance checking against the spec: pass / fail / partial / unknown, never a score.
 - **`market-evaluator`** — the ranking step the matrix refuses to do. Top three in order, each with product, price and sourcing, then best budget / best overall / best for features. Ranks only what clears every disqualifying requirement.

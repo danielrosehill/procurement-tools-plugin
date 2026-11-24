@@ -2,6 +2,16 @@
 
 Newest first. Each entry records what was decided, why, and what would reverse it.
 
+## 2026-11-24 — Product identifiers as a separate skill
+
+`part-number-equivalence` maps MPNs across regions; barcodes differ: one MPN can
+carry several, and listings mix siblings. So `product-identifiers` starts from a
+trading name, grades each code by source, and records sibling codes to expose
+mixed listings. `gtin.py` is offline; a valid check digit is never treated as
+proof of product.
+
+**Would reverse it:** a reliable open GTIN registry that returns MPN by variant.
+
 ## 2026-11-23 — Reference media in the quote loop
 
 Sellers ask "can you send a photo?", and for made-to-order or "what would you
